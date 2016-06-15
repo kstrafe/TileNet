@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 /// TileNet for holding a generic tile
 ///
 /// Uses an internal Vec and column-count to store
@@ -44,9 +45,9 @@ impl<T: std::fmt::Debug> std::fmt::Debug for TileNet<T> {
 			let mut current = format!("{:?}", tile);
 			let length = current.len();
 			if let Some(biggest) = biggest {
-				(0..biggest-length).map(|x| current.push(' ')).count();
+				(0..biggest-length).map(|_| current.push(' ')).count();
 			}
-			write!(formatter, "{}", current);
+			try!(write!(formatter, "{}", current));
 		}
 		Ok(())
 	}
@@ -151,9 +152,9 @@ mod tests {
 
 	#[test]
 	fn get_size() {
-		let mut map: TileNet<usize> = TileNet::new((10, 10));
+		let map: TileNet<usize> = TileNet::new((10, 10));
 		assert_eq!((10, 10), map.get_size());
-		let mut map: TileNet<usize> = TileNet::new((194, 483));
+		let map: TileNet<usize> = TileNet::new((194, 483));
 		assert_eq!((194, 483), map.get_size());
 	}
 
