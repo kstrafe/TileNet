@@ -240,5 +240,11 @@ mod tests {
 		for x in (1..31).map(|x| if x >= 25 { None } else { Some(x) }) {
 			assert_eq!(view.next().unwrap(), &x);
 		}
+
+		let map: TileNet<usize> = TileNet::from_iter(10, (1..31).map(|x| Some(x)));
+		let mut view = map.view_box((0, 10, 0, 3));
+		for x in 1..31 {
+			assert_eq!(view.next().unwrap(), &Some(x));
+		}
 	}
 }
