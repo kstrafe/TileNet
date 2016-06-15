@@ -88,11 +88,12 @@ impl<T> TileNet<T> where T: Clone + std::fmt::Debug {
 			cols: columns,
 		};
 		tilenet.map.extend(iter);
-		let remainder = tilenet.cols - tilenet.map.len() % tilenet.cols;
-		for _ in 0..remainder {
-			tilenet.map.push(None);
+		let remainder = tilenet.map.len() % tilenet.cols;
+		if remainder != 0 {
+			for _ in 0..tilenet.cols-remainder {
+				tilenet.map.push(None);
+			}
 		}
-		println!("Remainder: {}", remainder);
 		tilenet
 	}
 
@@ -234,7 +235,7 @@ mod tests {
 
 	#[test]
 	fn from_iter_with_remainder() {
-		let map: TileNet<usize> = TileNet::from_iter(10, (1..92).map(|x| Some(x)));
+		let map: TileNet<usize> = TileNet::from_iter(10, (1..25).map(|x| Some(x)));
 		println!("{:?}", map);
 	}
 }
