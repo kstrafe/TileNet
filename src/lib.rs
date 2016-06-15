@@ -236,6 +236,9 @@ mod tests {
 	#[test]
 	fn from_iter_with_remainder() {
 		let map: TileNet<usize> = TileNet::from_iter(10, (1..25).map(|x| Some(x)));
-		println!("{:?}", map);
+		let mut view = map.view_box((0, 10, 0, 3));
+		for x in (1..31).map(|x| if x >= 25 { None } else { Some(x) }) {
+			assert_eq!(view.next().unwrap(), &x);
+		}
 	}
 }
