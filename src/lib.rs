@@ -1,17 +1,16 @@
-use std::slice::Iter;
-/// Map for holding a generic tile
+/// TileNet for holding a generic tile
 ///
 /// Uses an internal Vec and column-count to store
 /// the map in a single array. Uses T::default() for empty
 /// elements
-struct Map<T> {
+struct TileNet<T> {
 	map: Vec<Option<T>>,
 	cols: usize,
 }
 
-impl<T> Map<T> where T: Clone {
-	fn new(m: (usize, usize)) -> Map<T> {
-		Map {
+impl<T> TileNet<T> where T: Clone {
+	fn new(m: (usize, usize)) -> TileNet<T> {
+		TileNet {
 			map: vec![None; m.0*m.1],
 			cols: m.1,
 		}
@@ -40,27 +39,36 @@ impl<T> Map<T> where T: Clone {
 		}
 	}
 
-	fn any_occupied<'a, I>(&self, mut list: I) -> bool
-		where I: Iterator<Item=(usize, usize)> {
+	fn any_occupied<I>(&self, mut list: I) -> bool
+	where I: Iterator<Item=(usize, usize)> {
 		list.any(|p| self.is_occupied(p))
 	}
 }
 
 #[cfg(test)]
 mod tests {
-	use super::Map;
+	use super::TileNet;
 
 	#[test]
 	fn get() {
-		let map: Map<usize> = Map::new((10, 10));
+		let map: TileNet<usize> = TileNet::new((10, 10));
 		assert_eq!(Some(&None), map.get((9, 9)));
 		assert_eq!(None, map.get((10, 9)));
 		assert_eq!(None, map.get((9, 10)));
 	}
 
 	#[test]
+	fn get_mut() {
+		let mut map: TileNet<usize> = TileNet::new((10, 10));
+		*map.get_mut((9, 9)).unwrap() = Some(0);
+		assert_eq!(Some(&Some(0)), map.get((9, 9)));
+		*map.get_mut((9, 9)).unwrap() = None;
+		assert_eq!(Some(&None), map.get((9, 9)));
+	}
+
+	#[test]
 	fn is_occupied() {
-		let mut map: Map<usize> = Map::new((10, 10));
+		let mut map: TileNet<usize> = TileNet::new((10, 10));
 		{
 			let element = map.get_mut((9, 9));
 			*element.unwrap() = Some(0);
@@ -72,7 +80,7 @@ mod tests {
 
 	#[test]
 	fn any_occupied() {
-		let mut map: Map<usize> = Map::new((10, 10));
+		let mut map: TileNet<usize> = TileNet::new((10, 10));
 		{
 			let element = map.get_mut((9, 9));
 			*element.unwrap() = Some(0);
