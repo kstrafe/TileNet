@@ -5,6 +5,7 @@
 /// the map in a single array. Uses T::default() for empty
 /// elements
 
+#[derive(Clone)]
 struct TileView<'a, T> where T: 'a + Clone + std::fmt::Debug {
 	tilenet: &'a TileNet<T>,
 	rectangle: (usize, usize, usize, usize),
@@ -14,18 +15,37 @@ struct TileView<'a, T> where T: 'a + Clone + std::fmt::Debug {
 impl<'a, T> Iterator for TileView<'a, T> where T: 'a + Clone + std::fmt::Debug {
 	type Item = &'a Option<T>;
 	fn next(&mut self) -> Option<Self::Item> {
+		if self.current.1 >= self.rectangle.3 {
+			return None;
+		}
 		let tile = self.tilenet.get(self.current);
 
 		self.current.0 += 1;
 		if self.current.0 >= self.rectangle.1 {
 			self.current.1 += 1;
-			self.current.0 = 0;
+			self.current.0 = self.rectangle.0;
 		}
-		if self.current.1 >= self.rectangle.3 {
-			None
-		} else {
-			tile
+		tile
+	}
+}
+
+impl<'a, T: 'a + std::fmt::Debug> std::fmt::Debug for TileView<'a, T> where T: Clone {
+	fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+		let biggest = self.clone().map(|x| format!("{:?}", x).len()).max();
+		let mut viewer = self.clone();
+		let width = viewer.rectangle.1 - viewer.rectangle.0;
+		for (index, tile) in viewer.enumerate() {
+			if index % width == 0 && index != 0 {
+				try!(formatter.write_str("\n"));
+			}
+			let mut current = format!("{:?}", tile);
+			let length = current.len();
+			if let Some(biggest) = biggest {
+				(0..biggest-length).map(|_| current.push(' ')).count();
+			}
+			try!(write!(formatter, "{} ", current));
 		}
+		Ok(())
 	}
 }
 
@@ -47,7 +67,7 @@ impl<T: std::fmt::Debug> std::fmt::Debug for TileNet<T> {
 			if let Some(biggest) = biggest {
 				(0..biggest-length).map(|_| current.push(' ')).count();
 			}
-			try!(write!(formatter, "{}", current));
+			try!(write!(formatter, "{} ", current));
 		}
 		Ok(())
 	}
@@ -198,5 +218,6 @@ mod tests {
 	fn from_iter() {
 		let map: TileNet<usize> = TileNet::from_iter(10, (1..101).map(|x| Some(x)));
 		println!("{:?}", map);
+		println!("{:?}", map.view_box((3, 8, 1, 4)))
 	}
 }
