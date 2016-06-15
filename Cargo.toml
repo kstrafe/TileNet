@@ -4,3 +4,4 @@ version = "0.1.0"
 authors = ["Bourgond Aries <macocio@gmail.com>"]
 
 [dependencies]
+# sfml = "0.11.2"
