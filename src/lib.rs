@@ -1,3 +1,4 @@
+use std::slice::Iter;
 /// Map for holding a generic tile
 ///
 /// Uses an internal Vec and column-count to store
@@ -39,8 +40,9 @@ impl<T> Map<T> where T: Clone {
 		}
 	}
 
-	fn any_occupied(&self, list: Vec<(usize, usize)>) -> bool {
-		list.iter().any(|&p| self.is_occupied(p))
+	fn any_occupied<'a, I>(&self, mut list: I) -> bool
+		where I: Iterator<Item=(usize, usize)> {
+		list.any(|p| self.is_occupied(p))
 	}
 }
 
@@ -78,9 +80,9 @@ mod tests {
 		assert_eq!(true, map.any_occupied(vec![
 			(9, 9),
 			(10, 0),
-		]));
+		].into_iter()));
 		assert_eq!(false, map.any_occupied(
-			(0..10).map(|x| (0, x)).collect::<Vec<_>>()
+			(0..10).map(|x| (0, x))
 		));
 	}
 }
