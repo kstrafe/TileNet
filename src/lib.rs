@@ -4,10 +4,52 @@
 /// the map in a single array. Uses T::default() for empty
 /// elements
 
-#[derive(Clone, Debug)]
+struct TileView<'a, T> where T: 'a + Clone + std::fmt::Debug {
+	tilenet: &'a TileNet<T>,
+	rectangle: (usize, usize, usize, usize),
+	current: (usize, usize),
+}
+
+impl<'a, T> Iterator for TileView<'a, T> where T: 'a + Clone + std::fmt::Debug {
+	type Item = &'a Option<T>;
+	fn next(&mut self) -> Option<Self::Item> {
+		let tile = self.tilenet.get(self.current);
+
+		self.current.0 += 1;
+		if self.current.0 >= self.rectangle.1 {
+			self.current.1 += 1;
+			self.current.0 = 0;
+		}
+		if self.current.1 >= self.rectangle.3 {
+			None
+		} else {
+			tile
+		}
+	}
+}
+
+#[derive(Clone)]
 struct TileNet<T> {
 	map: Vec<Option<T>>,
 	cols: usize,
+}
+
+impl<T: std::fmt::Debug> std::fmt::Debug for TileNet<T> {
+	fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+		let biggest = self.map.iter().map(|x| format!("{:?}", x).len()).max();
+		for (index, tile) in self.map.iter().enumerate() {
+			if index % self.cols == 0 && index != 0 {
+				try!(formatter.write_str("\n"));
+			}
+			let mut current = format!("{:?}", tile);
+			let length = current.len();
+			if let Some(biggest) = biggest {
+				(0..biggest-length).map(|x| current.push(' ')).count();
+			}
+			write!(formatter, "{}", current);
+		}
+		Ok(())
+	}
 }
 
 impl<T> TileNet<T> where T: Clone + std::fmt::Debug {
@@ -18,13 +60,26 @@ impl<T> TileNet<T> where T: Clone + std::fmt::Debug {
 		}
 	}
 
+	fn from_iter<I>(columns: usize, iter: I) -> TileNet<T>
+	where I: Iterator<Item=Option<T>> {
+		let mut tilenet = TileNet {
+			map: vec![],
+			cols: columns,
+		};
+		tilenet.map.extend(iter);
+		tilenet
+	}
+
 	fn get_size(&self) -> (usize, usize) {
 		(self.map.len()/self.cols, self.cols)
 	}
 
-	fn view_box(&self, rectangle: (usize, usize, usize, usize)) -> () {
-		self.map.iter()
-			.enumerate();
+	fn view_box(&self, rectangle: (usize, usize, usize, usize)) -> TileView<T> {
+		TileView {
+			tilenet: self,
+			rectangle: rectangle,
+			current: (rectangle.0, rectangle.2),
+		}
 	}
 
 	fn resize(&mut self, m: (usize, usize)) {
@@ -36,7 +91,7 @@ impl<T> TileNet<T> where T: Clone + std::fmt::Debug {
 			.enumerate()
 			.map(|x| (x.0 % self.cols, x.0 / self.cols, x.1))
 			.filter(|x| x.0 < new_cols && x.1 < new_rows)
-			.inspect(|x| println!("{:?}", x))
+			// .inspect(|x| println!("{:?}", x))
 			.inspect(|x| *new_map.get_mut(x.0 + x.1*new_cols).unwrap() = x.2.clone())
 			.count();
 
@@ -135,6 +190,12 @@ mod tests {
 		let mut map: TileNet<usize> = TileNet::new((10, 10));
 		*map.get_mut((0, 0)).unwrap() = Some(0);
 		map.resize((5, 5));
+		map.resize((10, 10));
+	}
+
+	#[test]
+	fn from_iter() {
+		let map: TileNet<usize> = TileNet::from_iter(10, (1..101).map(|x| Some(x)));
 		println!("{:?}", map);
 	}
 }
