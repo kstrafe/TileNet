@@ -32,7 +32,7 @@ impl<'a, T> Iterator for TileView<'a, T> where T: 'a + Clone + std::fmt::Debug {
 impl<'a, T: 'a + std::fmt::Debug> std::fmt::Debug for TileView<'a, T> where T: Clone {
 	fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
 		let biggest = self.clone().map(|x| format!("{:?}", x).len()).max();
-		let mut viewer = self.clone();
+		let viewer = self.clone();
 		let width = viewer.rectangle.1 - viewer.rectangle.0;
 		for (index, tile) in viewer.enumerate() {
 			if index % width == 0 && index != 0 {
@@ -217,7 +217,8 @@ mod tests {
 	#[test]
 	fn from_iter() {
 		let map: TileNet<usize> = TileNet::from_iter(10, (1..101).map(|x| Some(x)));
-		println!("{:?}", map);
-		println!("{:?}", map.view_box((3, 8, 1, 4)))
+		// assert_eq!(
+			// (14..19).chain((24..29)).chain((34..39)).map(|x| Some(x)),
+			// map.view_box((3, 8, 1, 4)));
 	}
 }
