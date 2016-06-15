@@ -3,17 +3,45 @@
 /// Uses an internal Vec and column-count to store
 /// the map in a single array. Uses T::default() for empty
 /// elements
+
+#[derive(Clone, Debug)]
 struct TileNet<T> {
 	map: Vec<Option<T>>,
 	cols: usize,
 }
 
-impl<T> TileNet<T> where T: Clone {
+impl<T> TileNet<T> where T: Clone + std::fmt::Debug {
 	fn new(m: (usize, usize)) -> TileNet<T> {
 		TileNet {
 			map: vec![None; m.0*m.1],
 			cols: m.1,
 		}
+	}
+
+	fn get_size(&self) -> (usize, usize) {
+		(self.map.len()/self.cols, self.cols)
+	}
+
+	fn view_box(&self, rectangle: (usize, usize, usize, usize)) -> () {
+		self.map.iter()
+			.enumerate();
+	}
+
+	fn resize(&mut self, m: (usize, usize)) {
+		let mut new_map: Vec<Option<T>> = vec![None; m.0*m.1];
+		let new_cols = m.1;
+		let new_rows = new_map.len() / new_cols;
+
+		self.map.iter()
+			.enumerate()
+			.map(|x| (x.0 % self.cols, x.0 / self.cols, x.1))
+			.filter(|x| x.0 < new_cols && x.1 < new_rows)
+			.inspect(|x| println!("{:?}", x))
+			.inspect(|x| *new_map.get_mut(x.0 + x.1*new_cols).unwrap() = x.2.clone())
+			.count();
+
+		self.map = new_map;
+		self.cols = new_cols;
 	}
 
 	fn get(&self, p: (usize, usize)) -> Option<&Option<T>> {
@@ -67,6 +95,14 @@ mod tests {
 	}
 
 	#[test]
+	fn get_size() {
+		let mut map: TileNet<usize> = TileNet::new((10, 10));
+		assert_eq!((10, 10), map.get_size());
+		let mut map: TileNet<usize> = TileNet::new((194, 483));
+		assert_eq!((194, 483), map.get_size());
+	}
+
+	#[test]
 	fn is_occupied() {
 		let mut map: TileNet<usize> = TileNet::new((10, 10));
 		{
@@ -92,5 +128,13 @@ mod tests {
 		assert_eq!(false, map.any_occupied(
 			(0..10).map(|x| (0, x))
 		));
+	}
+
+	#[test]
+	fn resize() {
+		let mut map: TileNet<usize> = TileNet::new((10, 10));
+		*map.get_mut((0, 0)).unwrap() = Some(0);
+		map.resize((5, 5));
+		println!("{:?}", map);
 	}
 }
