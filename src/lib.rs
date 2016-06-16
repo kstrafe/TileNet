@@ -261,9 +261,8 @@ mod tests {
 	fn from_iter_and_view_box() {
 		let map: TileNet<usize> = TileNet::from_iter(10, (1..101).map(|x| Some(x)));
 		let mut view = map.view_box((3, 8, 1, 4));
-		for x in (14usize..19).chain((24..29)).chain((34..39)) {
-			assert_eq!(view.next().unwrap(), &Some(x));
-		}
+		(14usize..19).chain((24..29)).chain((34..39)).map(|x| assert_eq!(view.next().unwrap(), &Some(x)))
+			.count();
 
 		// assert_eq!(
 			// (14..19).chain((24..29)).chain((34..39)),
