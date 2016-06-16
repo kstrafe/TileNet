@@ -182,6 +182,14 @@ impl<T> TileNet<T> where T: Clone + std::fmt::Debug {
 	where I: Iterator<Item=(usize, usize)> {
 		list.any(|p| self.is_occupied(p))
 	}
+
+	fn collide_set<'a, I>(&'a self, list: I) -> TileSet<'a, T, I>
+	where I: Clone + Iterator<Item=(usize, usize)> {
+		TileSet {
+			tilenet: self,
+			points: list,
+		}
+	}
 }
 
 #[cfg(test)]
@@ -274,6 +282,23 @@ mod tests {
 		let mut view = map.view_box((0, 10, 0, 3));
 		for x in 1..31 {
 			assert_eq!(view.next().unwrap(), &Some(x));
+		}
+	}
+
+	#[test]
+	fn collide_set() {
+		fn vectorize(right: usize) -> (usize, usize) {
+			(4, right)
+		}
+		type TypeFn = fn(right: usize) -> (usize, usize);
+		let function: TypeFn = vectorize;
+		let map: TileNet<usize> = TileNet::from_iter(10, (1..101).map(|x| if x > 50 { Some(x) } else { None }));
+		let mut set = map.collide_set((3..7).map(function));
+		for x in 1..3 {
+			assert_eq!(set.next().unwrap(), &None);
+		}
+		for x in 0..2 {
+			assert_eq!(set.next().unwrap(), &Some(55 + 10*x));
 		}
 	}
 }
