@@ -59,10 +59,6 @@ pub enum Hit {
 /// backwards along the horizontal axis.
 /// Then, its height is compared to the height of 'p0'.
 ///
-/// The graph seems to imply that the slope is 1, but it
-/// can be anything from 0 to 1. Slopes in different quadrants
-/// are handled in a similar manner.
-///
 pub fn right_or_bottom_hit(p0: (f32, f32), p1: (f32, f32)) -> Hit {
 	let middle = (p0.0.floor() + 1.0, p0.1.floor() + 1.0);
 	let dx = p1.0 - p0.0;
@@ -70,12 +66,12 @@ pub fn right_or_bottom_hit(p0: (f32, f32), p1: (f32, f32)) -> Hit {
 	let slope = dy/dx;
 	let dist_x = middle.0 - p0.0;
 	let slope_h = middle.1 - dist_x*slope;
-	if p0.1 > slope_h {
-		Hit::Bottom
-	} else if p0.1 < slope_h {
-		Hit::Right
-	} else {
+	if f32::abs(p0.1 - slope_h) < std::f32::EPSILON {
 		Hit::Middle
+	} else if p0.1 > slope_h {
+		Hit::Bottom
+	} else /*if p0.1 < slope_h*/ {
+		Hit::Right
 	}
 }
 
@@ -498,16 +494,62 @@ mod tests {
 	fn right_or_bottom_hit() {
 		use super::Hit;
 		let rob = ::right_or_bottom_hit;
-		// Slope 1
+		// Sample points
 		assert_eq!(rob((0.5, 0.5), (1.5, 1.5)), Hit::Middle);
 		assert_eq!(rob((0.5, 0.0), (1.5, 1.0)), Hit::Right);
 		assert_eq!(rob((0.5, 0.75), (1.5, 1.75)), Hit::Bottom);
+		assert_eq!(rob((0.0, 0.0), (1.1, 1.0)), Hit::Right);
+		assert_eq!(rob((0.0, 0.0), (0.9, 1.0)), Hit::Bottom);
+		assert_eq!(rob((0.5, 0.0), (1.0, 1.0)), Hit::Middle);
 
-		// Slope 2
-		assert_eq!(rob((0.5, 0.5), (1.5, 2.0)), Hit::Bottom);
-		assert_eq!(rob((0.5, 0.5), (0.5, 2.0)), Hit::Bottom);
+		// Check vectors through the midpoint
+		for x in 0..100 {
+			for y in 0..100 {
+				let x = x as f32 / 100.0;
+				let y = y as f32 / 100.0;
+				assert_eq!(rob((x, y), (1.0, 1.0)), Hit::Middle);
+			}
+		}
 
-		// Slope -1
-		assert_eq!(rob((0.5, 0.5), (1.5, -0.5)), Hit::Right);
+		// Check vectors through the bottom using triangle
+		// integrals. The fors should draw a triangle.
+		for x in 0..100 {
+			for y in x+1..100 {
+				let x = x as f32 / 100.0;
+				let y = y as f32 / 100.0;
+				assert_eq!(rob((x, y), (2.0, 2.0)), Hit::Bottom);
+			}
+		}
+
+		// Check from block 0 to point (1, 2), everything should
+		// bottom out.
+		for x in 0..100 {
+			for y in 0..100 {
+				let x = x as f32 / 100.0;
+				let y = y as f32 / 100.0;
+				assert_eq!(rob((x, y), (1.0, 2.0)), Hit::Bottom);
+			}
+		}
+
+		// Check vectors through the top using triangle
+		// integrals. The fors should draw a triangle.
+		for x in 0..100 {
+			for y in 0..x-1 {
+				let x = x as f32 / 100.0;
+				let y = y as f32 / 100.0;
+				assert_eq!(rob((x, y), (2.0, 2.0)), Hit::Right);
+			}
+		}
+
+		// Check from block 0 to point (2, 1), everything should
+		// right out.
+		for x in 0..100 {
+			for y in 0..100 {
+				let x = x as f32 / 100.0;
+				let y = y as f32 / 100.0;
+				assert_eq!(rob((x, y), (2.0, 1.0)), Hit::Right);
+			}
+		}
+
 	}
 }
