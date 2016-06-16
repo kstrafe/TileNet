@@ -102,6 +102,12 @@ impl<T: std::fmt::Debug> std::fmt::Debug for TileNet<T> {
 	}
 }
 
+impl TileNet<usize> {
+	fn sample() -> TileNet<usize> {
+		TileNet::from_iter(10, (1..101).map(|x| if x > 50 { Some(x) } else { None }))
+	}
+}
+
 impl<T> TileNet<T> where T: Clone + std::fmt::Debug {
 	fn new(m: (usize, usize)) -> TileNet<T> {
 		TileNet {
@@ -293,11 +299,17 @@ mod tests {
 		let function: TypeFn = vectorize;
 		let map: TileNet<usize> = TileNet::from_iter(10, (1..101).map(|x| if x > 50 { Some(x) } else { None }));
 		let mut set = map.collide_set((3..7).map(function));
-		for x in 1..3 {
+		for _ in 1..3 {
 			assert_eq!(set.next().unwrap(), &None);
 		}
 		for x in 0..2 {
 			assert_eq!(set.next().unwrap(), &Some(55 + 10*x));
 		}
+	}
+
+	#[test]
+	fn any_occupied_bounds() {
+		let map = TileNet::sample();
+		assert_eq!(true, map.any_occupied((3..).map(|x| (x, 3))));
 	}
 }
