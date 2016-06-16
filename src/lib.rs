@@ -1,4 +1,5 @@
 #![allow(dead_code)]
+
 /// TileNet for holding a generic tile
 ///
 /// Uses an internal Vec and column-count to store
@@ -10,6 +11,156 @@ fn float_to_coordinate(p: (f32, f32)) -> Option<(usize, usize)> {
 		None
 	} else {
 		Some((p.0.trunc() as usize, p.1.trunc() as usize))
+	}
+}
+
+#[derive(Debug, Eq, PartialEq)]
+pub enum Hit {
+	Bottom,
+	Middle,
+	Right,
+}
+
+/// Take two points, and find the side of the box
+/// that will be intersected.
+///
+/// The following graph
+/// explains the idea.
+///
+/// ```notrust
+/// |--------------------------------------|
+/// |                                      |
+/// |                                      |
+/// |                                      |
+/// |                                      |
+/// |                                      |
+/// |                                      |
+/// |                                      |
+/// |                        p0            |
+/// |                  |  X                |
+/// |               dy |   *               |
+/// |                  |     *             |
+/// |                  |   %   *           |
+/// |                        %   *         |
+/// |                          %   *       |
+/// |                            %   *     |
+/// |                              %   *   |
+/// |                                %   * |
+/// |                                  %   O
+/// |                                    % |
+/// |--------------------------------------%
+/// ```
+///
+/// X represents our 'p0' point. 'O' the projected
+/// intersection with the box. The slope is determined
+/// by comparing 'p0' and 'p1'.
+/// The slope is used to construct a line from the right
+/// corner (the '%' line). This line is extrapolated
+/// backwards along the horizontal axis.
+/// Then, its height is compared to the height of 'p0'.
+///
+/// The graph seems to imply that the slope is 1, but it
+/// can be anything from 0 to 1. Slopes in different quadrants
+/// are handled in a similar manner.
+///
+pub fn right_or_bottom_hit(p0: (f32, f32), p1: (f32, f32)) -> Hit {
+	let middle = (p0.0.floor() + 1.0, p0.1.floor() + 1.0);
+	let dx = p1.0 - p0.0;
+	let dy = p1.1 - p0.1;
+	let slope = dy/dx;
+	let dist_x = middle.0 - p0.0;
+	let slope_h = middle.1 - dist_x*slope;
+	if p0.1 > slope_h {
+		Hit::Bottom
+	} else if p0.1 < slope_h {
+		Hit::Right
+	} else {
+		Hit::Middle
+	}
+}
+
+/// Take a line and find the closest integer boundary from
+/// the first point between the second point.
+/// You have a point 'X', and another point outside
+/// the box. This algorithm finds the closest boundary
+/// 'O'. Boxes are integer-aligned.
+///
+/// |--------------------------------------|
+/// |                                      |
+/// |                                      |
+/// |                                      |
+/// |                                      |
+/// |                                      |
+/// |                                      |
+/// |                                      |
+/// |                        p0            |-
+/// |                     X                || dy
+/// |                      *               ||
+/// |                        *             ||
+/// |                          *           ||
+/// |                            *         ||
+/// |                              *       ||
+/// |                                *     ||
+/// |                                  *   ||
+/// |                                    * ||
+/// |                                      O-
+/// |                                      |
+/// |--------------------------------------|
+///                       |----------------| dx
+///
+fn truncate_to_boundary(p0: (f32, f32), p1: (f32, f32)) -> (f32, f32) {
+	let dx = p1.0 - p0.0;
+	let dy = p1.1 - p0.1;
+	// Divide problem into octants
+	// Each quadrant has two parts
+	// Each part has either dx >= dy or dx < dy
+	// Consider edges as their own cases
+
+	if dx > 0.0 && !dy.is_normal() {
+		// Edge 0
+		let right = p0.0.floor() + 1.0;
+		(right, p0.1)
+	} else if dx > 0.0 && dy > 0.0 && dx > dy {
+		// Quadrant 0 - Octant 0
+		let right = p0.0.floor() + 1.0;
+		let distance = right - p0.0;
+		let slope = dy/dx;
+		(right, distance*slope + p0.1)
+	} else if dx > 0.0 && dy > 0.0 && dx == dy {
+		(0.0, 0.0)
+		// Edge quadrant 0 diagonal
+	} else if dx > 0.0 && dy > 0.0 && dx < dy {
+		// Octant 1
+		(0.0, 0.0)
+	} else {
+		(0.0, 0.0)
+	}
+}
+
+fn line_to_indices(p0: (f32, f32), p1: (f32, f32)) {
+	let dx = p1.0 - p0.0;
+	let dy = p1.1 - p0.1;
+	if dy.abs() >= dx.abs() {
+		/*
+		|--------------------------> x
+		|*   |
+		|*   |
+		| *  |
+		| *  |
+		|  * | dy
+		|--- dx
+		v
+		y
+		*/
+	} else {
+		/*
+		|--------------------------> x
+		| ********                |
+		|         ********        |
+		|                 ********| dy
+		v
+		y --------------------------dx
+		*/
 	}
 }
 
@@ -335,5 +486,28 @@ mod tests {
 		assert_eq!(ftc((1.5, 5.25)), Some((1, 5)));
 		assert_eq!(ftc((-1.5, 5.25)), None);
 		assert_eq!(ftc((1.5, -5.25)), None);
+	}
+
+	#[test]
+	fn truncate_to_boundary() {
+		let tr = ::truncate_to_boundary;
+		assert_eq!(tr((0.5, 0.0), (1.5, 0.0)), (1.0, 0.0));
+	}
+
+	#[test]
+	fn right_or_bottom_hit() {
+		use super::Hit;
+		let rob = ::right_or_bottom_hit;
+		// Slope 1
+		assert_eq!(rob((0.5, 0.5), (1.5, 1.5)), Hit::Middle);
+		assert_eq!(rob((0.5, 0.0), (1.5, 1.0)), Hit::Right);
+		assert_eq!(rob((0.5, 0.75), (1.5, 1.75)), Hit::Bottom);
+
+		// Slope 2
+		assert_eq!(rob((0.5, 0.5), (1.5, 2.0)), Hit::Bottom);
+		assert_eq!(rob((0.5, 0.5), (0.5, 2.0)), Hit::Bottom);
+
+		// Slope -1
+		assert_eq!(rob((0.5, 0.5), (1.5, -0.5)), Hit::Right);
 	}
 }
