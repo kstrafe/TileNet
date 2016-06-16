@@ -14,6 +14,53 @@ fn float_to_coordinate(p: (f32, f32)) -> Option<(usize, usize)> {
 	}
 }
 
+fn has_nan(p: (f32, f32)) -> bool {
+	p.0.is_nan() || p.1.is_nan()
+}
+
+#[derive(Debug, Eq, PartialEq)]
+enum Quadrant {
+	One,
+	Two,
+	Three,
+	Four,
+}
+
+fn quadrant(p0: (f32, f32), p1: (f32, f32)) -> Quadrant {
+	if p1.0 >= p0.0 {
+		if p1.1 >= p0.1 {
+			Quadrant::One
+		} else {
+			Quadrant::Four
+		}
+	} else {
+		if p1.1 >= p0.1 {
+			Quadrant::Two
+		} else {
+			Quadrant::Three
+		}
+	}
+}
+
+fn first_quadrant_equivalent(mut p0: (f32, f32), mut p1: (f32, f32)) -> ((f32, f32), (f32, f32)) {
+	if has_nan(p0) || has_nan(p1) || p1.0 >= p0.0 && p1.1 >= p1.1 {
+			return (p0, p1);
+	}
+	// Mirror around vertical axis
+	if p1.0 < p0.0 {
+		let distance = p0.0 - p1.0;
+		p0.0 = p0.0.floor() + 1.0 - p0.0.fract();
+		p1.0 = p0.0 + distance;
+	}
+	// Mirror around horizontal axis
+	if p1.1 < p0.1 {
+		let distance = p0.1 - p1.1;
+		p0.1 = p0.1.floor() + 1.0 - p0.1.fract();
+		p1.1 = p0.1 + distance;
+	}
+	(p0, p1)
+}
+
 #[derive(Debug, Eq, PartialEq)]
 pub enum Hit {
 	Bottom,
@@ -556,5 +603,24 @@ mod tests {
 
 		// Slope dy/dx = 0, dx = 1
 		assert_eq!(rob((0.5, 0.5), (1.5, 0.5)), Hit::Right);
+	}
+
+	#[test]
+	fn first_quadrant_equivalent() {
+		let fqe = ::first_quadrant_equivalent;
+		assert_eq!(fqe((0.0, 0.0), (-1.0, 0.0)), ((1.0, 0.0), (2.0, 0.0)));
+		assert_eq!(fqe((0.5, 0.5), (-0.5, -0.5)), ((0.5, 0.5), (1.5, 1.5)));
+		assert_eq!(fqe((0.5, 0.5), (-0.5, 0.5)), ((0.5, 0.5), (1.5, 0.5)));
+	}
+
+	#[test]
+	fn quadrant() {
+		use super::Quadrant;
+		let q = ::quadrant;
+		assert_eq!(q((0.5, 0.5), (-0.5, 0.5)), Quadrant::Two);
+		assert_eq!(q((0.5, 0.5), (0.5, 0.5)), Quadrant::One);
+		assert_eq!(q((0.5, 0.5), (1.0, 0.5)), Quadrant::One);
+		assert_eq!(q((0.5, 0.5), (1.5, -0.5)), Quadrant::Four);
+		assert_eq!(q((0.5, 0.5), (0.5, 1.0)), Quadrant::One);
 	}
 }
