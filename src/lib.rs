@@ -6,6 +6,35 @@
 /// elements
 
 #[derive(Clone)]
+struct TileSet<'a, T, I> where T: 'a + Clone + std::fmt::Debug, I: Clone + Iterator<Item=(usize, usize)> {
+	tilenet: &'a TileNet<T>,
+	points: I,
+}
+
+impl<'a, T, I> Iterator for TileSet<'a, T, I> where T: 'a + Clone + std::fmt::Debug,
+I: Clone + Iterator<Item=(usize, usize)> {
+	type Item = &'a Option<T>;
+	fn next(&mut self) -> Option<Self::Item> {
+		if let Some(point) = self.points.next() {
+			self.tilenet.get(point)
+		} else {
+			None
+		}
+	}
+}
+
+impl<'a, T, I> std::fmt::Debug for TileSet<'a, T, I>
+where T: 'a + Clone + std::fmt::Debug, I: Clone + Iterator<Item=(usize, usize)> {
+	fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+		let viewer = self.clone();
+		for tile in viewer {
+			try!(write!(formatter, "{:?} ", tile));
+		}
+		Ok(())
+	}
+}
+
+#[derive(Clone)]
 struct TileView<'a, T> where T: 'a + Clone + std::fmt::Debug {
 	tilenet: &'a TileNet<T>,
 	rectangle: (usize, usize, usize, usize),
