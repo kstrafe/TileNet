@@ -19,6 +19,7 @@ pub enum Hit {
 	Bottom,
 	Middle,
 	Right,
+	Undetermined,
 }
 
 /// Take two points, and find the side of the box
@@ -58,6 +59,8 @@ pub enum Hit {
 /// corner (the '%' line). This line is extrapolated
 /// backwards along the horizontal axis.
 /// Then, its height is compared to the height of 'p0'.
+///
+/// The algorithm works for any positive slope.
 ///
 pub fn right_or_bottom_hit(p0: (f32, f32), p1: (f32, f32)) -> Hit {
 	let middle = (p0.0.floor() + 1.0, p0.1.floor() + 1.0);
@@ -551,5 +554,7 @@ mod tests {
 			}
 		}
 
+		// Slope dy/dx = 0, dx = 1
+		assert_eq!(rob((0.5, 0.5), (1.5, 0.5)), Hit::Right);
 	}
 }
