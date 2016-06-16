@@ -5,6 +5,14 @@
 /// the map in a single array. Uses T::default() for empty
 /// elements
 
+fn float_to_coordinate(p: (f32, f32)) -> Option<(usize, usize)> {
+	if p.0 < 0.0 || p.1 < 0.0 {
+		None
+	} else {
+		Some((p.0.trunc() as usize, p.1.trunc() as usize))
+	}
+}
+
 #[derive(Clone)]
 struct TileSet<'a, T, I> where T: 'a + Clone + std::fmt::Debug, I: Clone + Iterator<Item=(usize, usize)> {
 	tilenet: &'a TileNet<T>,
@@ -311,5 +319,21 @@ mod tests {
 	fn any_occupied_bounds() {
 		let map = TileNet::sample();
 		assert_eq!(true, map.any_occupied((3..).map(|x| (x, 3))));
+	}
+
+	#[test]
+	fn float_to_coordinate() {
+		let ftc = ::float_to_coordinate;
+		(0..100)
+			.map(|x| (x as f32, x as f32))
+			.inspect(|x| assert_eq!(ftc(*x), Some((x.0 as usize, x.1 as usize))))
+			.count();
+		assert_eq!(ftc((0.0, 0.0)), Some((0, 0)));
+		assert_eq!(ftc((0.5, 0.75)), Some((0, 0)));
+		assert_eq!(ftc((1.5, 0.75)), Some((1, 0)));
+		assert_eq!(ftc((1.5, 1.75)), Some((1, 1)));
+		assert_eq!(ftc((1.5, 5.25)), Some((1, 5)));
+		assert_eq!(ftc((-1.5, 5.25)), None);
+		assert_eq!(ftc((1.5, -5.25)), None);
 	}
 }
