@@ -6,11 +6,11 @@
 /// the map in a single array. Uses T::default() for empty
 /// elements
 
-fn float_to_coordinate(p: Point) -> Option<(usize, usize)> {
+fn float_to_coordinate(p: Point) -> Option<Index> {
 	if p.0 < 0.0 || p.1 < 0.0 {
 		None
 	} else {
-		Some((p.0.trunc() as usize, p.1.trunc() as usize))
+		Some(Index(p.0.trunc() as usize, p.1.trunc() as usize))
 	}
 }
 
@@ -18,7 +18,11 @@ fn has_nan(p: &Point) -> bool {
 	p.0.is_nan() || p.1.is_nan()
 }
 
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Point(f32, f32);
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct Index(usize, usize);
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Line(Point, Point);
 
 #[derive(Debug, Eq, PartialEq)]
@@ -45,7 +49,7 @@ fn quadrant(p0: Point, p1: Point) -> Quadrant {
 	}
 }
 
-fn first_quadrant_equivalent(mut p0: Point, mut p1: Point) -> (Point, Point) {
+fn first_quadrant_equivalent(p0: Point, p1: Point) -> (Point, Point) {
 	if has_nan(&p0) || has_nan(&p1) || p1.0 >= p0.0 && p1.1 >= p1.1 {
 			return (p0, p1);
 	}
@@ -71,7 +75,6 @@ pub enum Hit {
 	Bottom,
 	Middle,
 	Right,
-	Undetermined,
 }
 
 /// Take two points, and find the side of the box
@@ -410,7 +413,7 @@ impl<T> TileNet<T> where T: Clone + std::fmt::Debug {
 
 #[cfg(test)]
 mod tests {
-	use super::TileNet;
+	use super::{Index, TileNet, Point};
 
 	#[test]
 	fn get() {
@@ -527,22 +530,22 @@ mod tests {
 	fn float_to_coordinate() {
 		let ftc = ::float_to_coordinate;
 		(0..100)
-			.map(|x| (x as f32, x as f32))
-			.inspect(|x| assert_eq!(ftc(*x), Some((x.0 as usize, x.1 as usize))))
+			.map(|x| Point(x as f32, x as f32))
+			.inspect(|x| assert_eq!(ftc(*x), Some(Index(x.0 as usize, x.1 as usize))))
 			.count();
-		assert_eq!(ftc((0.0, 0.0)), Some((0, 0)));
-		assert_eq!(ftc((0.5, 0.75)), Some((0, 0)));
-		assert_eq!(ftc((1.5, 0.75)), Some((1, 0)));
-		assert_eq!(ftc((1.5, 1.75)), Some((1, 1)));
-		assert_eq!(ftc((1.5, 5.25)), Some((1, 5)));
-		assert_eq!(ftc((-1.5, 5.25)), None);
-		assert_eq!(ftc((1.5, -5.25)), None);
+		assert_eq!(ftc(Point(0.0, 0.0)), Some(Index(0, 0)));
+		assert_eq!(ftc(Point(0.5, 0.75)), Some(Index(0, 0)));
+		assert_eq!(ftc(Point(1.5, 0.75)), Some(Index(1, 0)));
+		assert_eq!(ftc(Point(1.5, 1.75)), Some(Index(1, 1)));
+		assert_eq!(ftc(Point(1.5, 5.25)), Some(Index(1, 5)));
+		assert_eq!(ftc(Point(-1.5, 5.25)), None);
+		assert_eq!(ftc(Point(1.5, -5.25)), None);
 	}
 
 	#[test]
 	fn truncate_to_boundary() {
 		let tr = ::truncate_to_boundary;
-		assert_eq!(tr((0.5, 0.0), (1.5, 0.0)), (1.0, 0.0));
+		assert_eq!(tr(Point(0.5, 0.0), Point(1.5, 0.0)), Point(1.0, 0.0));
 	}
 
 	#[test]
@@ -550,19 +553,19 @@ mod tests {
 		use super::Hit;
 		let rob = ::right_or_bottom_hit;
 		// Sample points
-		assert_eq!(rob((0.5, 0.5), (1.5, 1.5)), Hit::Middle);
-		assert_eq!(rob((0.5, 0.0), (1.5, 1.0)), Hit::Right);
-		assert_eq!(rob((0.5, 0.75), (1.5, 1.75)), Hit::Bottom);
-		assert_eq!(rob((0.0, 0.0), (1.1, 1.0)), Hit::Right);
-		assert_eq!(rob((0.0, 0.0), (0.9, 1.0)), Hit::Bottom);
-		assert_eq!(rob((0.5, 0.0), (1.0, 1.0)), Hit::Middle);
+		assert_eq!(rob(Point(0.5, 0.5), Point(1.5, 1.5)), Hit::Middle);
+		assert_eq!(rob(Point(0.5, 0.0), Point(1.5, 1.0)), Hit::Right);
+		assert_eq!(rob(Point(0.5, 0.75), Point(1.5, 1.75)), Hit::Bottom);
+		assert_eq!(rob(Point(0.0, 0.0), Point(1.1, 1.0)), Hit::Right);
+		assert_eq!(rob(Point(0.0, 0.0), Point(0.9, 1.0)), Hit::Bottom);
+		assert_eq!(rob(Point(0.5, 0.0), Point(1.0, 1.0)), Hit::Middle);
 
 		// Check vectors through the midpoint
 		for x in 0..100 {
 			for y in 0..100 {
 				let x = x as f32 / 100.0;
 				let y = y as f32 / 100.0;
-				assert_eq!(rob((x, y), (1.0, 1.0)), Hit::Middle);
+				assert_eq!(rob(Point(x, y), Point(1.0, 1.0)), Hit::Middle);
 			}
 		}
 
@@ -572,7 +575,7 @@ mod tests {
 			for y in x+1..100 {
 				let x = x as f32 / 100.0;
 				let y = y as f32 / 100.0;
-				assert_eq!(rob((x, y), (2.0, 2.0)), Hit::Bottom);
+				assert_eq!(rob(Point(x, y), Point(2.0, 2.0)), Hit::Bottom);
 			}
 		}
 
@@ -582,7 +585,7 @@ mod tests {
 			for y in 0..100 {
 				let x = x as f32 / 100.0;
 				let y = y as f32 / 100.0;
-				assert_eq!(rob((x, y), (1.0, 2.0)), Hit::Bottom);
+				assert_eq!(rob(Point(x, y), Point(1.0, 2.0)), Hit::Bottom);
 			}
 		}
 
@@ -592,7 +595,7 @@ mod tests {
 			for y in 0..x-1 {
 				let x = x as f32 / 100.0;
 				let y = y as f32 / 100.0;
-				assert_eq!(rob((x, y), (2.0, 2.0)), Hit::Right);
+				assert_eq!(rob(Point(x, y), Point(2.0, 2.0)), Hit::Right);
 			}
 		}
 
@@ -602,30 +605,30 @@ mod tests {
 			for y in 0..100 {
 				let x = x as f32 / 100.0;
 				let y = y as f32 / 100.0;
-				assert_eq!(rob((x, y), (2.0, 1.0)), Hit::Right);
+				assert_eq!(rob(Point(x, y), Point(2.0, 1.0)), Hit::Right);
 			}
 		}
 
 		// Slope dy/dx = 0, dx = 1
-		assert_eq!(rob((0.5, 0.5), (1.5, 0.5)), Hit::Right);
+		assert_eq!(rob(Point(0.5, 0.5), Point(1.5, 0.5)), Hit::Right);
 	}
 
 	#[test]
 	fn first_quadrant_equivalent() {
 		let fqe = ::first_quadrant_equivalent;
-		assert_eq!(fqe((0.0, 0.0), (-1.0, 0.0)), ((1.0, 0.0), (2.0, 0.0)));
-		assert_eq!(fqe((0.5, 0.5), (-0.5, -0.5)), ((0.5, 0.5), (1.5, 1.5)));
-		assert_eq!(fqe((0.5, 0.5), (-0.5, 0.5)), ((0.5, 0.5), (1.5, 0.5)));
+		assert_eq!(fqe(Point(0.0, 0.0), Point(-1.0, 0.0)), (Point(1.0, 0.0), Point(2.0, 0.0)));
+		assert_eq!(fqe(Point(0.5, 0.5), Point(-0.5, -0.5)), (Point(0.5, 0.5), Point(1.5, 1.5)));
+		assert_eq!(fqe(Point(0.5, 0.5), Point(-0.5, 0.5)), (Point(0.5, 0.5), Point(1.5, 0.5)));
 	}
 
 	#[test]
 	fn quadrant() {
 		use super::Quadrant;
 		let q = ::quadrant;
-		assert_eq!(q((0.5, 0.5), (-0.5, 0.5)), Quadrant::Two);
-		assert_eq!(q((0.5, 0.5), (0.5, 0.5)), Quadrant::One);
-		assert_eq!(q((0.5, 0.5), (1.0, 0.5)), Quadrant::One);
-		assert_eq!(q((0.5, 0.5), (1.5, -0.5)), Quadrant::Four);
-		assert_eq!(q((0.5, 0.5), (0.5, 1.0)), Quadrant::One);
+		assert_eq!(q(Point(0.5, 0.5), Point(-0.5, 0.5)), Quadrant::Two);
+		assert_eq!(q(Point(0.5, 0.5), Point(0.5, 0.5)), Quadrant::One);
+		assert_eq!(q(Point(0.5, 0.5), Point(1.0, 0.5)), Quadrant::One);
+		assert_eq!(q(Point(0.5, 0.5), Point(1.5, -0.5)), Quadrant::Four);
+		assert_eq!(q(Point(0.5, 0.5), Point(0.5, 1.0)), Quadrant::One);
 	}
 }
