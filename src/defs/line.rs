@@ -54,52 +54,66 @@ impl Line {
 	/// blocks that have been overlapped by a small portion of the line.
 	/// The blocks are given by an integer boundary.
 	pub fn supercover(&self) -> () {
-		// First octant
 		let (mut start, stop) = (self.0, self.1);
-		let new = self.1 - self.0;
+		let new = stop - start;
 		let (dx, dy) = (new.0, new.1);
 		let (step_x, step_y);
-		// First octant
-		if dx > 0.0 && dy >= 0.0 && dx > dy {
-			step_x = 1.0;
-			step_y = dy/dx;
+		let margin = 1.001;
 		// Second octant
-		} else if dx > 0.0 && dy > 0.0 && dy >= dx {
-			step_x = dx/dy;
-			step_y = 1.0;
+		if dx > 0.0 && dy > 0.0 && dy >= dx {
+			step_x = dx/dy/margin;
+			step_y = 1.0/margin;
 		// Third octant
 		} else if dx <= 0.0 && dy > 0.0 && dy > -dx {
-			step_x = dx/dy;
-			step_y = 1.0;
+			step_x = dx/dy/margin;
+			step_y = 1.0/margin;
+			println!("Detected third octant {},{}", step_x, step_y);
 		// Fourth octant
-		} else if dx < 0.0 && dy > 0.0 && dx >= -dy {
-			step_x = -1.0;
-			step_y = -dy/dx;
+		} else if dx < 0.0 && dy > 0.0 && -dx >= dy {
+			step_x = -1.0/margin;
+			step_y = -dy/dx/margin;
+			println!("Detected fourth octant {},{}", step_x, step_y);
 		// Fifth octant
 		} else if dx < 0.0 && dy <= 0.0 && dx < dy {
-			step_x = -1.0;
-			step_y = -dy/dx;
+			step_x = -1.0/margin;
+			step_y = -dy/dx/margin;
 		// Sixth octant
-		} else if dx < 0.0 && dy <= 0.0 && dy > -dx {
-			step_x = -dx/dy;
-			step_y = -1.0;
+		} else if dx < 0.0 && dy < 0.0 && dy <= dx {
+			step_x = -dx/dy/margin;
+			step_y = -1.0/margin;
 		// Seventh octant
-		} else if dx <= 0.0 && dy < 0.0 && dx > -dy {
-			step_x = dx/dy;
-			step_y = -1.0;
+		} else if dx >= 0.0 && dy < 0.0 && -dy > dx {
+			step_x = -dx/dy/margin;
+			step_y = -1.0/margin;
+			println!("Detected seventh octant {},{}", step_x, step_y);
 		// Eight octant
-		} else /*if dx < 0.0 && dy <= 0.0 && dx > -dy*/ {
-			step_x = 1.0;
-			step_y = -dy/dx;
+		} else if dx > 0.0 && dy < 0.0 && dx > -dy {
+			step_x = 1.0/margin;
+			step_y = dy/dx/margin;
+		} // First octant
+		else /*dx > 0.0 && dy >= 0.0 && dx > dy*/ {
+			step_x = 1.0/margin;
+			step_y = dy/dx/margin;
 		}
 		while start.to_index() != stop.to_index() {
+			println!("current: {:?}, end: {:?}", start, stop);
 			start.0 += step_x;
 			start.1 += step_y;
-			println!("NewPos: {:?}", start);
+			abort_on_high_locations(start.0, start.1);
 		}
 	}
 
 }
+
+#[cfg(test)]
+fn abort_on_high_locations(x: f32, y: f32) {
+	if x.abs() > 4000.0 || y.abs() > 4000.0 {
+		panic!("Loop reaches point ({}, {}), I don't think this is correct. Aborting test.", x, y);
+	}
+}
+
+#[cfg(not(test))]
+fn abort_on_high_locations(_: f32, _: f32) { }
 
 #[cfg(test)]
 mod tests {
@@ -107,7 +121,20 @@ mod tests {
 
 	#[test]
 	fn supercover() {
-		let line = Line(Point(0.0, 0.0), Point(-100.0, 0.0));
-		line.supercover();
+		(0i32..360)
+			.map(|x| x as f32)
+			.map(|x| x*::std::f32::consts::PI/180.0)
+			.map(|x| Point(x.cos(), x.sin()))
+			.map(|x| Line::from_origo(x))
+			.inspect(|x| { println!("Testing: {:?}", x); x.supercover() })
+			.count();
+
+		(0i32..360)
+			.map(|x| x as f32)
+			.map(|x| x*::std::f32::consts::PI/180.0)
+			.map(|x| Point(2000.0*x.cos(), 3000.0*x.sin()))
+			.map(|x| Line::from_origo(x))
+			.inspect(|x| { println!("Testing: {:?}", x); x.supercover() })
+			.count();
 	}
 }
