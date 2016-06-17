@@ -1,4 +1,4 @@
-use super::{Point, Quadrant};
+pub use super::{Index, Point, Quadrant};
 
 /// Describe a line by its start and end `Point` respectively
 ///
@@ -47,4 +47,67 @@ impl Line {
 		(self.1).0 = (self.0).0 + distance;
 	}
 
+	/// Create a supercover line
+	///
+	/// The supercover line covers all discrete blocks.
+	/// It's similar to Bresenham's algorithm, but it includes the
+	/// blocks that have been overlapped by a small portion of the line.
+	/// The blocks are given by an integer boundary.
+	pub fn supercover(&self) -> () {
+		// First octant
+		let (mut start, stop) = (self.0, self.1);
+		let new = self.1 - self.0;
+		let (dx, dy) = (new.0, new.1);
+		let (step_x, step_y);
+		// First octant
+		if dx > 0.0 && dy >= 0.0 && dx > dy {
+			step_x = 1.0;
+			step_y = dy/dx;
+		// Second octant
+		} else if dx > 0.0 && dy > 0.0 && dy >= dx {
+			step_x = dx/dy;
+			step_y = 1.0;
+		// Third octant
+		} else if dx <= 0.0 && dy > 0.0 && dy > -dx {
+			step_x = dx/dy;
+			step_y = 1.0;
+		// Fourth octant
+		} else if dx < 0.0 && dy > 0.0 && dx >= -dy {
+			step_x = -1.0;
+			step_y = -dy/dx;
+		// Fifth octant
+		} else if dx < 0.0 && dy <= 0.0 && dx < dy {
+			step_x = -1.0;
+			step_y = -dy/dx;
+		// Sixth octant
+		} else if dx < 0.0 && dy <= 0.0 && dy > -dx {
+			step_x = -dx/dy;
+			step_y = -1.0;
+		// Seventh octant
+		} else if dx <= 0.0 && dy < 0.0 && dx > -dy {
+			step_x = dx/dy;
+			step_y = -1.0;
+		// Eight octant
+		} else /*if dx < 0.0 && dy <= 0.0 && dx > -dy*/ {
+			step_x = 1.0;
+			step_y = -dy/dx;
+		}
+		while start.to_index() != stop.to_index() {
+			start.0 += step_x;
+			start.1 += step_y;
+			println!("NewPos: {:?}", start);
+		}
+	}
+
+}
+
+#[cfg(test)]
+mod tests {
+	use super::{Line, Point};
+
+	#[test]
+	fn supercover() {
+		let line = Line(Point(0.0, 0.0), Point(-100.0, 0.0));
+		line.supercover();
+	}
 }

@@ -1,19 +1,8 @@
 pub mod line;
+pub mod point;
 
 pub use self::line::Line;
-
-/// Describe a point in 2-space
-///
-/// Use two floats to denote the x and y coordinates
-/// respectively in the tuple.
-/// ```
-/// use tile_net::Point;
-/// let point = Point(0.5, 1.0);
-/// assert_eq!(point.0, 0.5);
-/// assert_eq!(point.1, 1.0);
-/// ```
-#[derive(Clone, Copy, Debug, PartialEq)]
-pub struct Point(pub f32, pub f32);
+pub use self::point::Point;
 
 /// Index for a tile in a 2D map
 ///
