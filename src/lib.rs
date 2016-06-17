@@ -6,7 +6,7 @@
 /// the map in a single array. Uses T::default() for empty
 /// elements
 
-fn float_to_coordinate(p: (f32, f32)) -> Option<(usize, usize)> {
+fn float_to_coordinate(p: Point) -> Option<(usize, usize)> {
 	if p.0 < 0.0 || p.1 < 0.0 {
 		None
 	} else {
@@ -14,9 +14,12 @@ fn float_to_coordinate(p: (f32, f32)) -> Option<(usize, usize)> {
 	}
 }
 
-fn has_nan(p: (f32, f32)) -> bool {
+fn has_nan(p: &Point) -> bool {
 	p.0.is_nan() || p.1.is_nan()
 }
+
+pub struct Point(f32, f32);
+pub struct Line(Point, Point);
 
 #[derive(Debug, Eq, PartialEq)]
 enum Quadrant {
@@ -26,7 +29,7 @@ enum Quadrant {
 	Four,
 }
 
-fn quadrant(p0: (f32, f32), p1: (f32, f32)) -> Quadrant {
+fn quadrant(p0: Point, p1: Point) -> Quadrant {
 	if p1.0 >= p0.0 {
 		if p1.1 >= p0.1 {
 			Quadrant::One
@@ -42,10 +45,12 @@ fn quadrant(p0: (f32, f32), p1: (f32, f32)) -> Quadrant {
 	}
 }
 
-fn first_quadrant_equivalent(mut p0: (f32, f32), mut p1: (f32, f32)) -> ((f32, f32), (f32, f32)) {
-	if has_nan(p0) || has_nan(p1) || p1.0 >= p0.0 && p1.1 >= p1.1 {
+fn first_quadrant_equivalent(mut p0: Point, mut p1: Point) -> (Point, Point) {
+	if has_nan(&p0) || has_nan(&p1) || p1.0 >= p0.0 && p1.1 >= p1.1 {
 			return (p0, p1);
 	}
+	let mut p0: (f32, f32) = (p0.0, p0.1);
+	let mut p1: (f32, f32) = (p1.0, p1.1);
 	// Mirror around vertical axis
 	if p1.0 < p0.0 {
 		let distance = p0.0 - p1.0;
@@ -58,7 +63,7 @@ fn first_quadrant_equivalent(mut p0: (f32, f32), mut p1: (f32, f32)) -> ((f32, f
 		p0.1 = p0.1.floor() + 1.0 - p0.1.fract();
 		p1.1 = p0.1 + distance;
 	}
-	(p0, p1)
+	(Point(p0.0, p0.1), Point(p1.0, p1.1))
 }
 
 #[derive(Debug, Eq, PartialEq)]
@@ -109,7 +114,7 @@ pub enum Hit {
 ///
 /// The algorithm works for any positive slope.
 ///
-pub fn right_or_bottom_hit(p0: (f32, f32), p1: (f32, f32)) -> Hit {
+pub fn right_or_bottom_hit(p0: Point, p1: Point) -> Hit {
 	let middle = (p0.0.floor() + 1.0, p0.1.floor() + 1.0);
 	let dx = p1.0 - p0.0;
 	let dy = p1.1 - p0.1;
@@ -154,7 +159,7 @@ pub fn right_or_bottom_hit(p0: (f32, f32), p1: (f32, f32)) -> Hit {
 /// |--------------------------------------|
 ///                       |----------------| dx
 ///
-fn truncate_to_boundary(p0: (f32, f32), p1: (f32, f32)) -> (f32, f32) {
+fn truncate_to_boundary(p0: Point, p1: Point) -> Point {
 	let dx = p1.0 - p0.0;
 	let dy = p1.1 - p0.1;
 	// Divide problem into octants
@@ -165,25 +170,25 @@ fn truncate_to_boundary(p0: (f32, f32), p1: (f32, f32)) -> (f32, f32) {
 	if dx > 0.0 && !dy.is_normal() {
 		// Edge 0
 		let right = p0.0.floor() + 1.0;
-		(right, p0.1)
+		Point(right, p0.1)
 	} else if dx > 0.0 && dy > 0.0 && dx > dy {
 		// Quadrant 0 - Octant 0
 		let right = p0.0.floor() + 1.0;
 		let distance = right - p0.0;
 		let slope = dy/dx;
-		(right, distance*slope + p0.1)
+		Point(right, distance*slope + p0.1)
 	} else if dx > 0.0 && dy > 0.0 && dx == dy {
-		(0.0, 0.0)
+		Point(0.0, 0.0)
 		// Edge quadrant 0 diagonal
 	} else if dx > 0.0 && dy > 0.0 && dx < dy {
 		// Octant 1
-		(0.0, 0.0)
+		Point(0.0, 0.0)
 	} else {
-		(0.0, 0.0)
+		Point(0.0, 0.0)
 	}
 }
 
-fn line_to_indices(p0: (f32, f32), p1: (f32, f32)) {
+fn line_to_indices(p0: Point, p1: Point) {
 	let dx = p1.0 - p0.0;
 	let dy = p1.1 - p0.1;
 	if dy.abs() >= dx.abs() {
