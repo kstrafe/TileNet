@@ -1,10 +1,10 @@
 #![allow(dead_code)]
 
-/// TileNet for holding a generic tile
-///
-/// Uses an internal Vec and column-count to store
-/// the map in a single array. Uses T::default() for empty
-/// elements
+//! TileNet holds integer aligned tiles for broad phase continuous collision detection
+
+mod defs;
+
+pub use defs::{Index, Line, Point};
 
 fn float_to_coordinate(p: Point) -> Option<Index> {
 	if p.0 < 0.0 || p.1 < 0.0 {
@@ -17,13 +17,6 @@ fn float_to_coordinate(p: Point) -> Option<Index> {
 fn has_nan(p: &Point) -> bool {
 	p.0.is_nan() || p.1.is_nan()
 }
-
-#[derive(Clone, Copy, Debug, PartialEq)]
-pub struct Point(f32, f32);
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub struct Index(usize, usize);
-#[derive(Clone, Copy, Debug, PartialEq)]
-pub struct Line(Point, Point);
 
 #[derive(Debug, Eq, PartialEq)]
 enum Quadrant {
@@ -117,16 +110,16 @@ pub enum Hit {
 ///
 /// The algorithm works for any positive slope.
 ///
-pub fn right_or_bottom_hit(p0: Point, p1: Point) -> Hit {
-	let middle = (p0.0.floor() + 1.0, p0.1.floor() + 1.0);
-	let dx = p1.0 - p0.0;
-	let dy = p1.1 - p0.1;
+pub fn right_or_bottom_hit(l: Line) -> Hit {
+	let middle = ((l.0).0.floor() + 1.0, (l.0).1.floor() + 1.0);
+	let dx = (l.1).0 - (l.0).0;
+	let dy = (l.1).1 - (l.0).1;
 	let slope = dy/dx;
-	let dist_x = middle.0 - p0.0;
+	let dist_x = middle.0 - (l.0).0;
 	let slope_h = middle.1 - dist_x*slope;
-	if f32::abs(p0.1 - slope_h) < std::f32::EPSILON {
+	if f32::abs((l.0).1 - slope_h) < std::f32::EPSILON {
 		Hit::Middle
-	} else if p0.1 > slope_h {
+	} else if (l.0).1 > slope_h {
 		Hit::Bottom
 	} else /*if p0.1 < slope_h*/ {
 		Hit::Right
@@ -413,7 +406,7 @@ impl<T> TileNet<T> where T: Clone + std::fmt::Debug {
 
 #[cfg(test)]
 mod tests {
-	use super::{Index, TileNet, Point};
+	use super::{Index, Line, TileNet, Point};
 
 	#[test]
 	fn get() {
@@ -553,19 +546,19 @@ mod tests {
 		use super::Hit;
 		let rob = ::right_or_bottom_hit;
 		// Sample points
-		assert_eq!(rob(Point(0.5, 0.5), Point(1.5, 1.5)), Hit::Middle);
-		assert_eq!(rob(Point(0.5, 0.0), Point(1.5, 1.0)), Hit::Right);
-		assert_eq!(rob(Point(0.5, 0.75), Point(1.5, 1.75)), Hit::Bottom);
-		assert_eq!(rob(Point(0.0, 0.0), Point(1.1, 1.0)), Hit::Right);
-		assert_eq!(rob(Point(0.0, 0.0), Point(0.9, 1.0)), Hit::Bottom);
-		assert_eq!(rob(Point(0.5, 0.0), Point(1.0, 1.0)), Hit::Middle);
+		assert_eq!(rob(Line(Point(0.5, 0.5), Point(1.5, 1.5))), Hit::Middle);
+		assert_eq!(rob(Line(Point(0.5, 0.0), Point(1.5, 1.0))), Hit::Right);
+		assert_eq!(rob(Line(Point(0.5, 0.75), Point(1.5, 1.75))), Hit::Bottom);
+		assert_eq!(rob(Line(Point(0.0, 0.0), Point(1.1, 1.0))), Hit::Right);
+		assert_eq!(rob(Line(Point(0.0, 0.0), Point(0.9, 1.0))), Hit::Bottom);
+		assert_eq!(rob(Line(Point(0.5, 0.0), Point(1.0, 1.0))), Hit::Middle);
 
 		// Check vectors through the midpoint
 		for x in 0..100 {
 			for y in 0..100 {
 				let x = x as f32 / 100.0;
 				let y = y as f32 / 100.0;
-				assert_eq!(rob(Point(x, y), Point(1.0, 1.0)), Hit::Middle);
+				assert_eq!(rob(Line(Point(x, y), Point(1.0, 1.0))), Hit::Middle);
 			}
 		}
 
@@ -575,7 +568,7 @@ mod tests {
 			for y in x+1..100 {
 				let x = x as f32 / 100.0;
 				let y = y as f32 / 100.0;
-				assert_eq!(rob(Point(x, y), Point(2.0, 2.0)), Hit::Bottom);
+				assert_eq!(rob(Line(Point(x, y), Point(2.0, 2.0))), Hit::Bottom);
 			}
 		}
 
@@ -585,7 +578,7 @@ mod tests {
 			for y in 0..100 {
 				let x = x as f32 / 100.0;
 				let y = y as f32 / 100.0;
-				assert_eq!(rob(Point(x, y), Point(1.0, 2.0)), Hit::Bottom);
+				assert_eq!(rob(Line(Point(x, y), Point(1.0, 2.0))), Hit::Bottom);
 			}
 		}
 
@@ -595,7 +588,7 @@ mod tests {
 			for y in 0..x-1 {
 				let x = x as f32 / 100.0;
 				let y = y as f32 / 100.0;
-				assert_eq!(rob(Point(x, y), Point(2.0, 2.0)), Hit::Right);
+				assert_eq!(rob(Line(Point(x, y), Point(2.0, 2.0))), Hit::Right);
 			}
 		}
 
@@ -605,12 +598,12 @@ mod tests {
 			for y in 0..100 {
 				let x = x as f32 / 100.0;
 				let y = y as f32 / 100.0;
-				assert_eq!(rob(Point(x, y), Point(2.0, 1.0)), Hit::Right);
+				assert_eq!(rob(Line(Point(x, y), Point(2.0, 1.0))), Hit::Right);
 			}
 		}
 
 		// Slope dy/dx = 0, dx = 1
-		assert_eq!(rob(Point(0.5, 0.5), Point(1.5, 0.5)), Hit::Right);
+		assert_eq!(rob(Line(Point(0.5, 0.5), Point(1.5, 0.5))), Hit::Right);
 	}
 
 	#[test]
