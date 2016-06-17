@@ -1,3 +1,7 @@
+pub mod line;
+
+pub use self::line::Line;
+
 /// Describe a point in 2-space
 ///
 /// Use two floats to denote the x and y coordinates
@@ -26,19 +30,58 @@ pub struct Point(pub f32, pub f32);
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct Index(pub usize, pub usize);
 
-/// Describe a line by its start and end `Point` respectively
+/// Descriptor denoting the quadrant
+/// of a point or line.
 ///
-/// A line can be constructed and used with tuples
+/// The quadrant of a line is taken
+/// with the starting point as origo.
+/// The ending point's quadrant can
+/// then be deduced.
+///
+/// The quadrant of a point is taken
+/// with respect to origo (0, 0).
+///
+/// Quadrant points lying on a zero
+/// will include their start-angle
+/// quadrant. This means the following:
+/// ( or ) is an excluding boundary.
+/// [ or ] is an inclusive boundary.
+///
+/// The following ranges describe each
+/// quadrant.
+///
+/// ```ignore
+/// One = ((0, inf), [0, inf)) + [0, 0]
+/// Two = ((-inf, 0], (0, inf))
+/// Three = ((-inf, 0), (-inf, 0])
+/// Four = ([0, inf), (0, -inf))
+/// ```
+///
+/// Note that origo is considered part of the first quadrant.
+/// The reasoning behind this is that the algorithms relying on
+/// it have no specific discriminatory use against an origo point.
+/// Going with the first quadrant is the most natural result then.
+///
+/// We can confirm these boundaries by using a `Line`:
 ///
 /// ```
-/// use tile_net::{Line, Point};
-/// let start = Point(0.5, 1.0);
-/// let finish = Point(1.2, -1.0);
-/// let line = Line(start, finish);
-/// assert_eq!(line.0, start);
-/// assert_eq!(line.1, finish);
+/// use tile_net::{Line, Point, Quadrant};
+/// let line = Line::from_origo(Point(1.0, 0.0));
+/// assert_eq!(line.quadrant(), Quadrant::One);
+/// let line = Line::from_origo(Point(0.0, 1.0));
+/// assert_eq!(line.quadrant(), Quadrant::Two);
+/// let line = Line::from_origo(Point(-1.0, 0.0));
+/// assert_eq!(line.quadrant(), Quadrant::Three);
+/// let line = Line::from_origo(Point(0.0, -1.0));
+/// assert_eq!(line.quadrant(), Quadrant::Four);
+/// let line = Line::from_origo(Point(0.0, 0.0));
+/// assert_eq!(line.quadrant(), Quadrant::One);
 /// ```
-#[derive(Clone, Copy, Debug, PartialEq)]
-pub struct Line(pub Point, pub Point);
-
-
+/// ![Plot](../../../res/quadrant.png)
+#[derive(Debug, Eq, PartialEq)]
+pub enum Quadrant {
+	One,
+	Two,
+	Three,
+	Four,
+}

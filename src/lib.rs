@@ -4,7 +4,7 @@
 
 mod defs;
 
-pub use defs::{Index, Line, Point};
+pub use defs::{Index, Line, Point, Quadrant};
 
 fn float_to_coordinate(p: Point) -> Option<Index> {
 	if p.0 < 0.0 || p.1 < 0.0 {
@@ -16,14 +16,6 @@ fn float_to_coordinate(p: Point) -> Option<Index> {
 
 fn has_nan(p: &Point) -> bool {
 	p.0.is_nan() || p.1.is_nan()
-}
-
-#[derive(Debug, Eq, PartialEq)]
-enum Quadrant {
-	One,
-	Two,
-	Three,
-	Four,
 }
 
 fn quadrant(p0: Point, p1: Point) -> Quadrant {
