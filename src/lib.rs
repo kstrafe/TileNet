@@ -1,10 +1,12 @@
 #![allow(dead_code)]
 //! TileNet holds integer aligned tiles for broad phase continuous collision detection
+//!
 
 mod defs;
 
 pub use defs::{Index, Line, Point, Quadrant};
 
+/// Tile iterator returning tiles from the `tile_net::TileNet`.
 #[derive(Clone)]
 struct TileSet<'a, T, I> where T: 'a + Clone + std::fmt::Debug, I: Clone + Iterator<Item=(usize, usize)> {
 	tilenet: &'a TileNet<T>,
@@ -34,6 +36,7 @@ where T: 'a + Clone + std::fmt::Debug, I: Clone + Iterator<Item=(usize, usize)> 
 	}
 }
 
+/// Tile iterator for a rectangular view of the `tile_net::TileNet`.
 #[derive(Clone)]
 struct TileView<'a, T> where T: 'a + Clone + std::fmt::Debug {
 	tilenet: &'a TileNet<T>,
