@@ -53,56 +53,73 @@ impl Line {
 	/// It's similar to Bresenham's algorithm, but it includes the
 	/// blocks that have been overlapped by a small portion of the line.
 	/// The blocks are given by an integer boundary.
-	pub fn supercover(&self) -> () {
-		let (mut start, stop) = (self.0, self.1);
+	///
+	/// This particular algorithm is based off
+	/// http://lodev.org/cgtutor/raycasting.html
+	/// It is a ray tracer.
+	///
+	/// The created iterator leaps from the start to the end node.
+	/// The intended use for this iterator is in finding a collision
+	/// between a tile and a moving object.
+	///
+	pub fn supercover(&self) -> LineTiles {
+		let (start, stop) = (self.0, self.1);
 		let new = stop - start;
-		let (dx, dy) = (new.0, new.1);
-		let (step_x, step_y);
-		let margin = 1.001;
-		// Second octant
-		if dx > 0.0 && dy > 0.0 && dy >= dx {
-			step_x = dx/dy/margin;
-			step_y = 1.0/margin;
-		// Third octant
-		} else if dx <= 0.0 && dy > 0.0 && dy > -dx {
-			step_x = dx/dy/margin;
-			step_y = 1.0/margin;
-			println!("Detected third octant {},{}", step_x, step_y);
-		// Fourth octant
-		} else if dx < 0.0 && dy > 0.0 && -dx >= dy {
-			step_x = -1.0/margin;
-			step_y = -dy/dx/margin;
-			println!("Detected fourth octant {},{}", step_x, step_y);
-		// Fifth octant
-		} else if dx < 0.0 && dy <= 0.0 && dx < dy {
-			step_x = -1.0/margin;
-			step_y = -dy/dx/margin;
-		// Sixth octant
-		} else if dx < 0.0 && dy < 0.0 && dy <= dx {
-			step_x = -dx/dy/margin;
-			step_y = -1.0/margin;
-		// Seventh octant
-		} else if dx >= 0.0 && dy < 0.0 && -dy > dx {
-			step_x = -dx/dy/margin;
-			step_y = -1.0/margin;
-			println!("Detected seventh octant {},{}", step_x, step_y);
-		// Eight octant
-		} else if dx > 0.0 && dy < 0.0 && dx > -dy {
-			step_x = 1.0/margin;
-			step_y = dy/dx/margin;
-		} // First octant
-		else /*dx > 0.0 && dy >= 0.0 && dx > dy*/ {
-			step_x = 1.0/margin;
-			step_y = dy/dx/margin;
+		let (vx, vy) = (new.0, new.1);
+		let slope_x = 1.0 + vy*vy/vx/vx;
+		let slope_y = 1.0 + vy*vy/vx/vx;
+		let (dx, dy) = (slope_x.sqrt(), slope_y.sqrt());
+
+		let (ix, iy) = (start.0.floor(), start.1.floor());
+
+		let (sx, sy);
+		let (ex, ey);
+
+		if vx < 0.0 {
+			sx = -1.0; ex = (start.0 - ix)*dx;
+		} else {
+			sx = 1.0; ex = (ix + 1.0 - start.0)*dx;
 		}
-		while start.to_index() != stop.to_index() {
-			println!("current: {:?}, end: {:?}", start, stop);
-			start.0 += step_x;
-			start.1 += step_y;
-			abort_on_high_locations(start.0, start.1);
+
+		if vy < 0.0 {
+			sy = -1.0; ey = (start.1 - iy)*dy;
+		} else {
+			sy = 1.0; ey = (iy + 1.0 - start.1)*dy;
+		}
+
+		let len = (vx*vx + vy*vy).sqrt();
+
+		LineTiles {
+			len: len, dx: dx, dy: dy, sx: sx, sy: sy,
+			ex: ex, ey: ey, ix: ix, iy: iy
 		}
 	}
 
+}
+
+pub struct LineTiles {
+	len: f32, dx: f32, dy: f32, sx: f32, sy: f32,
+	ex: f32, ey: f32, ix: f32, iy: f32,
+}
+
+impl Iterator for LineTiles {
+	type Item = (i32, i32);
+	fn next(&mut self) -> Option<Self::Item> {
+		if self.ex.min(self.ey) <= self.len {
+			let old = Some((self.ix as i32, self.iy as i32));
+			println!("{:?}", old);
+			if self.ex < self.ey {
+				self.ex = self.ex + self.dx;
+				self.ix = self.ix + self.sx;
+			} else {
+				self.ey = self.ey + self.dx;
+				self.iy = self.iy + self.sy;
+			}
+			old
+		} else {
+			None
+		}
+	}
 }
 
 #[cfg(test)]
@@ -126,7 +143,7 @@ mod tests {
 			.map(|x| x*::std::f32::consts::PI/180.0)
 			.map(|x| Point(x.cos(), x.sin()))
 			.map(|x| Line::from_origo(x))
-			.inspect(|x| { println!("Testing: {:?}", x); x.supercover() })
+			.map(|x| x.supercover())
 			.count();
 
 		(0i32..360)
@@ -134,7 +151,7 @@ mod tests {
 			.map(|x| x*::std::f32::consts::PI/180.0)
 			.map(|x| Point(2000.0*x.cos(), 3000.0*x.sin()))
 			.map(|x| Line::from_origo(x))
-			.inspect(|x| { println!("Testing: {:?}", x); x.supercover() })
+			.map(|x| x.supercover())
 			.count();
 	}
 }
