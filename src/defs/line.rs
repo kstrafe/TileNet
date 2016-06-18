@@ -89,10 +89,9 @@ impl Line {
 
 		let len = (vx*vx + vy*vy).sqrt();
 
-		let nan = ::std::f32::NAN;
 		LineTiles {
 			len: len, dx: dx, dy: dy, sx: sx, sy: sy,
-			ex: ex, ey: ey, ix: ix, iy: iy, ixo: nan, iyo: nan,
+			ex: ex, ey: ey, ix: ix, iy: iy,
 		}
 	}
 
@@ -113,19 +112,19 @@ impl Line {
 ///		println!("{:?}", tile);
 /// }
 /// ```
+#[derive(Clone)]
 pub struct LineTiles {
 	len: f32, dx: f32, dy: f32, sx: f32, sy: f32,
-	ex: f32, ey: f32, ix: f32, iy: f32, ixo: f32, iyo: f32,
+	ex: f32, ey: f32, ix: f32, iy: f32,
 }
 
 impl Iterator for LineTiles {
-	type Item = (i32, i32);
+	type Item = (usize, usize);
 	fn next(&mut self) -> Option<Self::Item> {
+		// TODO: ensure convergence for all cases
 		if self.ex.min(self.ey) <= self.len
-		&& (self.ixo != self.ix || self.iyo != self.iy) {
-			self.ixo = self.ix;
-			self.iyo = self.iy;
-			let old = Some((self.ix as i32, self.iy as i32));
+		&& (self.ix == 16777216.0 || self.iy == 16777216.0) {
+			let old = Some((self.ix as usize, self.iy as usize));
 			if self.ex < self.ey {
 				self.ex = self.ex + self.dx;
 				self.ix = self.ix + self.sx;
@@ -142,6 +141,7 @@ impl Iterator for LineTiles {
 
 #[cfg(test)]
 mod tests {
+	use std::f32;
 	use super::{Line, Point};
 
 	#[test]
@@ -163,9 +163,24 @@ mod tests {
 			.map(|x| x.count())
 			.count();
 
-		Line::from_origo(Point(1e9, 0.0))
+		Line::from_origo(Point(1e9, 1e9))
 			.supercover()
-			.count();
+			.last()
+			.map(|x| println!("{:?}", x));
+		Line::from_origo(Point(1.1, 0.0))
+			.supercover()
+			.last()
+			.map(|x| println!("{:?}", x));
+		Line::from_origo(Point(1e9, f32::EPSILON))
+			.supercover()
+			.last()
+			.map(|x| println!("{:?}", x));
+		(0i64..).map(|x| (x as f32, x as f32+1.0)).filter(|x| {
+			x.0 == x.1
+		}).take(4).inspect(|x| println!("{:?}", x)).count();
+		(2305843009213693951i64..).map(|x| (x as f64, x as f64+1.0)).filter(|x| {
+			x.0 == x.1
+		}).take(4).inspect(|x| println!("{:?}", x)).count();
 	}
 
 }
