@@ -1,10 +1,11 @@
 use super::Index;
-use std::ops::Sub;
+use std::ops::{Add, Sub};
 
 /// Describe a point in 2-space
 ///
 /// Use two floats to denote the x and y coordinates
 /// respectively in the tuple.
+///
 /// ```
 /// use tile_net::Point;
 /// let point = Point(0.5, 1.0);
@@ -17,6 +18,14 @@ pub struct Point(pub f32, pub f32);
 impl Point {
 	pub fn to_index(&self) -> Index {
 		Index(self.0.floor() as usize, self.1.floor() as usize)
+	}
+}
+
+impl Add for Point {
+	type Output = Point;
+
+	fn add(self, other: Point) -> Point {
+		Point(self.0 + other.0, self.1 + other.1)
 	}
 }
 
