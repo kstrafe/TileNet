@@ -16,10 +16,22 @@ pub use super::{Index, Point, Quadrant};
 pub struct Line(pub Point, pub Point);
 
 impl Line {
+
+	/// Create a line using its end-point, starting in (0, 0)
 	pub fn from_origo(p: Point) -> Line {
 		Line(Point(0.0, 0.0), p)
 	}
 
+	/// Show us which quadrant this vector points to
+	///
+	/// The quadrant is the second (end) point relative
+	/// to the beginning point. See more in-depth rules
+	/// about edge cacses at `Quadrant`.
+	///
+	/// ```
+	/// use tile_net::{Line, Point, Quadrant};
+	/// assert_eq!(Line::from_origo(Point(-3.0, 0.0)).quadrant(), Quadrant::Three);
+	/// ```
 	pub fn quadrant(&self) -> Quadrant {
 		if (self.1).0 <= (self.0).0 &&
 		(self.1).1 > (self.0).1 {
@@ -33,18 +45,6 @@ impl Line {
 		} else {
 			Quadrant::One
 		}
-	}
-
-	pub fn mirror_x(&mut self) {
-		let distance = (self.0).1 - (self.1).1;
-		(self.0).1 = (self.0).1.floor() + 1.0 - (self.0).1.fract();
-		(self.1).1 = (self.0).1 + distance;
-	}
-
-	pub fn mirror_y(&mut self) {
-		let distance = (self.0).0 - (self.1).0;
-		(self.0).0 = (self.0).0.floor() + 1.0 - (self.0).0.fract();
-		(self.1).0 = (self.0).0 + distance;
 	}
 
 	/// Create a supercover line
@@ -97,6 +97,20 @@ impl Line {
 
 }
 
+/// Iterator for traversing from one point on the line
+/// to the end point
+///
+/// This iterator traverses according to the supercover
+/// ray-tracing algorithm. It can be obtained via the
+/// following example.
+///
+/// ```
+/// use tile_net::{Line, Point};
+/// let line = Line(Point(0.8, 10.3), Point(-30.0, 5.9));
+/// let tiles = line.supercover();
+/// for tile in tiles {
+///		println!("{:?}", tile);
+/// }
 pub struct LineTiles {
 	len: f32, dx: f32, dy: f32, sx: f32, sy: f32,
 	ex: f32, ey: f32, ix: f32, iy: f32,
@@ -111,7 +125,7 @@ impl Iterator for LineTiles {
 				self.ex = self.ex + self.dx;
 				self.ix = self.ix + self.sx;
 			} else {
-				self.ey = self.ey + self.dx;
+				self.ey = self.ey + self.dy;
 				self.iy = self.iy + self.sy;
 			}
 			old
