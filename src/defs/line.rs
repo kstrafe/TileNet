@@ -26,7 +26,7 @@ impl Line {
 	///
 	/// The quadrant is the second (end) point relative
 	/// to the beginning point. See more in-depth rules
-	/// about edge cacses at `Quadrant`.
+	/// about edge cases in `tile_net::Quadrant`.
 	///
 	/// ```
 	/// use tile_net::{Line, Point, Quadrant};
@@ -89,9 +89,10 @@ impl Line {
 
 		let len = (vx*vx + vy*vy).sqrt();
 
+		let nan = ::std::f32::NAN;
 		LineTiles {
 			len: len, dx: dx, dy: dy, sx: sx, sy: sy,
-			ex: ex, ey: ey, ix: ix, iy: iy
+			ex: ex, ey: ey, ix: ix, iy: iy, ixo: nan, iyo: nan,
 		}
 	}
 
@@ -111,15 +112,19 @@ impl Line {
 /// for tile in tiles {
 ///		println!("{:?}", tile);
 /// }
+/// ```
 pub struct LineTiles {
 	len: f32, dx: f32, dy: f32, sx: f32, sy: f32,
-	ex: f32, ey: f32, ix: f32, iy: f32,
+	ex: f32, ey: f32, ix: f32, iy: f32, ixo: f32, iyo: f32,
 }
 
 impl Iterator for LineTiles {
 	type Item = (i32, i32);
 	fn next(&mut self) -> Option<Self::Item> {
-		if self.ex.min(self.ey) <= self.len {
+		if self.ex.min(self.ey) <= self.len
+		&& (self.ixo != self.ix || self.iyo != self.iy) {
+			self.ixo = self.ix;
+			self.iyo = self.iy;
 			let old = Some((self.ix as i32, self.iy as i32));
 			if self.ex < self.ey {
 				self.ex = self.ex + self.dx;
@@ -155,6 +160,11 @@ mod tests {
 			.map(|x| Point(2000.0*x.cos(), 3000.0*x.sin()))
 			.map(|x| Line::from_origo(x))
 			.map(|x| x.supercover())
+			.map(|x| x.count())
+			.count();
+
+		Line::from_origo(Point(1e9, 0.0))
+			.supercover()
 			.count();
 	}
 
