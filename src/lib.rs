@@ -1,5 +1,4 @@
 #![allow(dead_code)]
-
 //! TileNet holds integer aligned tiles for broad phase continuous collision detection
 
 mod defs;

@@ -107,7 +107,6 @@ impl Iterator for LineTiles {
 	fn next(&mut self) -> Option<Self::Item> {
 		if self.ex.min(self.ey) <= self.len {
 			let old = Some((self.ix as i32, self.iy as i32));
-			println!("{:?}", old);
 			if self.ex < self.ey {
 				self.ex = self.ex + self.dx;
 				self.ix = self.ix + self.sx;
@@ -123,16 +122,6 @@ impl Iterator for LineTiles {
 }
 
 #[cfg(test)]
-fn abort_on_high_locations(x: f32, y: f32) {
-	if x.abs() > 4000.0 || y.abs() > 4000.0 {
-		panic!("Loop reaches point ({}, {}), I don't think this is correct. Aborting test.", x, y);
-	}
-}
-
-#[cfg(not(test))]
-fn abort_on_high_locations(_: f32, _: f32) { }
-
-#[cfg(test)]
 mod tests {
 	use super::{Line, Point};
 
@@ -146,12 +135,13 @@ mod tests {
 			.map(|x| x.supercover())
 			.count();
 
-		(0i32..360)
+		(0i32..3600)
 			.map(|x| x as f32)
-			.map(|x| x*::std::f32::consts::PI/180.0)
+			.map(|x| x*::std::f32::consts::PI/1800.0)
 			.map(|x| Point(2000.0*x.cos(), 3000.0*x.sin()))
 			.map(|x| Line::from_origo(x))
 			.map(|x| x.supercover())
 			.count();
 	}
+
 }
