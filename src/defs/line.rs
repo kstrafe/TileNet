@@ -1,5 +1,8 @@
 pub use super::{Index, Point, Quadrant};
 
+const MAX: f32 = 16777216 as f32;
+const MIN: f32 = -16777216 as f32;
+
 /// Describe a line by its start and end `Point` respectively
 ///
 /// A line can be constructed and used with tuples
@@ -143,41 +146,10 @@ impl Iterator for LineTiles {
 
 #[cfg(test)]
 mod tests {
-	use std::f32;
-	use super::{Line, Point};
-
 	#[test]
 	fn supercover() {
-		(0i32..360)
-			.map(|x| x as f32)
-			.map(|x| x*::std::f32::consts::PI/180.0)
-			.map(|x| Point(x.cos(), x.sin()))
-			.map(|x| Line::from_origin(x))
-			.map(|x| x.supercover())
-			.count();
-
-		(0i32..3600)
-			.map(|x| x as f32)
-			.map(|x| x*::std::f32::consts::PI/1800.0)
-			.map(|x| Point(2000.0*x.cos(), 3000.0*x.sin()))
-			.map(|x| Line::from_origin(x))
-			.map(|x| x.supercover())
-			.map(|x| x.count())
-			.count();
-
-		(0i32..).map(|x| (x as f32, x as f32 + 1.0))
-			.filter(|x| x.0 == x.1)
-			.take(2)
-			.inspect(|x| println!("{:?}", x))
-			.count();
-
-		(0i32..).map(|x| -x).map(|x| (x as f32, x as f32-1.0)).filter(|x| {
-			x.0 == x.1
-		}).take(2).inspect(|x| println!("{:?}", x)).count();
-
-		let x = 1.0;
-		println!("{}", 16777216 as f32);
-		assert_eq!(16777216 as f32 + x, 16777216 as f32);
+		assert_eq!(super::MAX + 1.0, super::MAX);
+		assert_eq!(super::MIN - 1.0, super::MIN);
 	}
 
 }
