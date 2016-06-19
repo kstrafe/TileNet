@@ -23,12 +23,12 @@ pub struct Index(pub usize, pub usize);
 /// of a point or line.
 ///
 /// The quadrant of a line is taken
-/// with the starting point as origo.
+/// with the starting point as origin.
 /// The ending point's quadrant can
 /// then be deduced.
 ///
 /// The quadrant of a point is taken
-/// with respect to origo (0, 0).
+/// with respect to origin (0, 0).
 ///
 /// Quadrant points lying on a zero
 /// will include their start-angle
@@ -46,24 +46,24 @@ pub struct Index(pub usize, pub usize);
 /// Four = ([0, inf), (0, -inf))
 /// ```
 ///
-/// Note that origo is considered part of the first quadrant.
+/// Note that origin is considered part of the first quadrant.
 /// The reasoning behind this is that the algorithms relying on
-/// it have no specific discriminatory use against an origo point.
+/// it have no specific discriminatory use against an origin point.
 /// Going with the first quadrant is the most natural result then.
 ///
 /// We can confirm these boundaries by using a `Line`:
 ///
 /// ```
 /// use tile_net::{Line, Point, Quadrant};
-/// let line = Line::from_origo(Point(1.0, 0.0));
+/// let line = Line::from_origin(Point(1.0, 0.0));
 /// assert_eq!(line.quadrant(), Quadrant::One);
-/// let line = Line::from_origo(Point(0.0, 1.0));
+/// let line = Line::from_origin(Point(0.0, 1.0));
 /// assert_eq!(line.quadrant(), Quadrant::Two);
-/// let line = Line::from_origo(Point(-1.0, 0.0));
+/// let line = Line::from_origin(Point(-1.0, 0.0));
 /// assert_eq!(line.quadrant(), Quadrant::Three);
-/// let line = Line::from_origo(Point(0.0, -1.0));
+/// let line = Line::from_origin(Point(0.0, -1.0));
 /// assert_eq!(line.quadrant(), Quadrant::Four);
-/// let line = Line::from_origo(Point(0.0, 0.0));
+/// let line = Line::from_origin(Point(0.0, 0.0));
 /// assert_eq!(line.quadrant(), Quadrant::One);
 /// ```
 /// ![Plot](../../../res/quadrant.png)

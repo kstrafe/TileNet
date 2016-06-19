@@ -18,7 +18,7 @@ pub struct Line(pub Point, pub Point);
 impl Line {
 
 	/// Create a line using its end-point, starting in (0, 0)
-	pub fn from_origo(p: Point) -> Line {
+	pub fn from_origin(p: Point) -> Line {
 		Line(Point(0.0, 0.0), p)
 	}
 
@@ -30,7 +30,7 @@ impl Line {
 	///
 	/// ```
 	/// use tile_net::{Line, Point, Quadrant};
-	/// assert_eq!(Line::from_origo(Point(-3.0, 0.0)).quadrant(), Quadrant::Three);
+	/// assert_eq!(Line::from_origin(Point(-3.0, 0.0)).quadrant(), Quadrant::Three);
 	/// ```
 	pub fn quadrant(&self) -> Quadrant {
 		if (self.1).0 <= (self.0).0 &&
@@ -150,7 +150,7 @@ mod tests {
 			.map(|x| x as f32)
 			.map(|x| x*::std::f32::consts::PI/180.0)
 			.map(|x| Point(x.cos(), x.sin()))
-			.map(|x| Line::from_origo(x))
+			.map(|x| Line::from_origin(x))
 			.map(|x| x.supercover())
 			.count();
 
@@ -158,7 +158,7 @@ mod tests {
 			.map(|x| x as f32)
 			.map(|x| x*::std::f32::consts::PI/1800.0)
 			.map(|x| Point(2000.0*x.cos(), 3000.0*x.sin()))
-			.map(|x| Line::from_origo(x))
+			.map(|x| Line::from_origin(x))
 			.map(|x| x.supercover())
 			.map(|x| x.count())
 			.count();
