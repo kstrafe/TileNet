@@ -118,12 +118,14 @@ pub struct LineTiles {
 	ex: f32, ey: f32, ix: f32, iy: f32,
 }
 
+const LIMIT: f32 = 16777216.0;
+
 impl Iterator for LineTiles {
 	type Item = (usize, usize);
 	fn next(&mut self) -> Option<Self::Item> {
 		// TODO: ensure convergence for all cases
 		if self.ex.min(self.ey) <= self.len
-		&& (self.ix == 16777216.0 || self.iy == 16777216.0) {
+		&& self.ix != 16777216.0 && self.iy != 16777216.0 {
 			let old = Some((self.ix as usize, self.iy as usize));
 			if self.ex < self.ey {
 				self.ex = self.ex + self.dx;
@@ -163,24 +165,19 @@ mod tests {
 			.map(|x| x.count())
 			.count();
 
-		Line::from_origo(Point(1e9, 1e9))
-			.supercover()
-			.last()
-			.map(|x| println!("{:?}", x));
-		Line::from_origo(Point(1.1, 0.0))
-			.supercover()
-			.last()
-			.map(|x| println!("{:?}", x));
-		Line::from_origo(Point(1e9, f32::EPSILON))
-			.supercover()
-			.last()
-			.map(|x| println!("{:?}", x));
-		(0i64..).map(|x| (x as f32, x as f32+1.0)).filter(|x| {
+		(0i32..).map(|x| (x as f32, x as f32 + 1.0))
+			.filter(|x| x.0 == x.1)
+			.take(2)
+			.inspect(|x| println!("{:?}", x))
+			.count();
+
+		(0i32..).map(|x| -x).map(|x| (x as f32, x as f32-1.0)).filter(|x| {
 			x.0 == x.1
-		}).take(4).inspect(|x| println!("{:?}", x)).count();
-		(2305843009213693951i64..).map(|x| (x as f64, x as f64+1.0)).filter(|x| {
-			x.0 == x.1
-		}).take(4).inspect(|x| println!("{:?}", x)).count();
+		}).take(2).inspect(|x| println!("{:?}", x)).count();
+
+		let x = 1.0;
+		println!("{}", 16777216 as f32);
+		assert_eq!(16777216 as f32 + x, 16777216 as f32);
 	}
 
 }
