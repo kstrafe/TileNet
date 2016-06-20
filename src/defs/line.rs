@@ -126,11 +126,15 @@ impl Iterator for LineTiles {
 			let old = Some((self.ix, self.iy));
 			self.it += 1;
 			if self.ex < self.ey {
-				self.ex = self.ex + self.dx;
-				self.ix = self.ix + self.sx;
+				self.ex += self.dx;
+				self.ix += self.sx;
 			} else {
-				self.ey = self.ey + self.dy;
-				self.iy = self.iy + self.sy;
+				self.ey += self.dy;
+				self.iy += self.sy;
+			}
+			if self.ex.abs() > 2.0 && self.ey.abs() > 2.0 {
+				self.ex -= 1.0;
+				self.ey -= 1.0;
 			}
 			old
 		} else {
@@ -150,9 +154,10 @@ mod tests {
 
 	#[test]
 	fn supercover() {
-		for i in Line::from_origin(Point(10.9, 0.999)).supercover() {
-			println!("{:?}", i);
-		}
+		Line::from_origin(Point(-10.0, -308777216.0))
+			.supercover()
+			.last()
+			.map(|x| println!("{:?}", x));
 		assert!(seq((10.0, 0.0), (0..11).map(|x| (x, 0))));
 		assert!(seq((0.0, 10.0), (0..11).map(|x| (0, x))));
 	}
