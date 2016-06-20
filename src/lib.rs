@@ -25,17 +25,21 @@ pub use defs::{Index, Line, Point, Quadrant};
 /// }
 /// ```
 #[derive(Clone)]
-pub struct TileSet<'a, T, I> where T: 'a + Clone + std::fmt::Debug, I: Iterator<Item=(usize, usize)> {
+pub struct TileSet<'a, T, I> where T: 'a + Clone + std::fmt::Debug, I: Iterator<Item=(i32, i32)> {
 	tilenet: &'a TileNet<T>,
 	points: I,
 }
 
 impl<'a, T, I> Iterator for TileSet<'a, T, I> where T: 'a + Clone + std::fmt::Debug,
-I: Iterator<Item=(usize, usize)> {
+I: Iterator<Item=(i32, i32)> {
 	type Item = &'a Option<T>;
 	fn next(&mut self) -> Option<Self::Item> {
 		if let Some(point) = self.points.next() {
-			self.tilenet.get(point)
+			if point.0 >= 0 && point.1 >= 0 {
+				self.tilenet.get((point.0 as usize, point.1 as usize))
+			} else {
+				None
+			}
 		} else {
 			None
 		}
@@ -43,7 +47,7 @@ I: Iterator<Item=(usize, usize)> {
 }
 
 impl<'a, T, I> std::fmt::Debug for TileSet<'a, T, I>
-where T: 'a + Clone + std::fmt::Debug, I: Clone + Iterator<Item=(usize, usize)> {
+where T: 'a + Clone + std::fmt::Debug, I: Clone + Iterator<Item=(i32, i32)> {
 	fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
 		let viewer = self.clone();
 		for tile in viewer {
@@ -210,7 +214,7 @@ impl<T> TileNet<T> where T: Clone + std::fmt::Debug {
 	}
 
 	pub fn collide_set<'a, I>(&'a self, list: I) -> TileSet<'a, T, I>
-	where I: Iterator<Item=(usize, usize)> {
+	where I: Iterator<Item=(i32, i32)> {
 		TileSet {
 			tilenet: self,
 			points: list,

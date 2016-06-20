@@ -70,30 +70,30 @@ impl Line {
 		let new = stop - start;
 		let (vx, vy) = (new.0, new.1);
 		let slope_x = 1.0 + vy*vy/vx/vx;
-		let slope_y = 1.0 + vy*vy/vx/vx;
+		let slope_y = 1.0 + vx*vx/vy/vy;
 		let (dx, dy) = (slope_x.sqrt(), slope_y.sqrt());
 
-		let (ix, iy) = (start.0.floor(), start.1.floor());
+		let (ix, iy) = (start.0.floor() as i32, start.1.floor() as i32);
 
 		let (sx, sy);
 		let (ex, ey);
 
 		if vx < 0.0 {
-			sx = -1.0; ex = (start.0 - ix)*dx;
+			sx = -1; ex = start.0.fract()*dx;
 		} else {
-			sx = 1.0; ex = (ix + 1.0 - start.0)*dx;
+			sx = 1; ex = (1.0 - start.0.fract())*dx;
 		}
 
 		if vy < 0.0 {
-			sy = -1.0; ey = (start.1 - iy)*dy;
+			sy = -1; ey = start.1.fract()*dy;
 		} else {
-			sy = 1.0; ey = (iy + 1.0 - start.1)*dy;
+			sy = 1; ey = (1.0 - start.1.fract())*dy;
 		}
 
-		let len = (vx*vx + vy*vy).sqrt();
+		let len = vx.abs().floor() as usize + vy.abs().floor() as usize;
 
 		LineTiles {
-			len: len, dx: dx, dy: dy, sx: sx, sy: sy,
+			it: 0, len: len, dx: dx, dy: dy, sx: sx, sy: sy,
 			ex: ex, ey: ey, ix: ix, iy: iy,
 		}
 	}
@@ -117,26 +117,28 @@ impl Line {
 /// ```
 #[derive(Clone)]
 pub struct LineTiles {
-	len: f32, dx: f32, dy: f32, sx: f32, sy: f32,
-	ex: f32, ey: f32, ix: f32, iy: f32,
+	it: usize, len: usize,
+	dx: f32, dy: f32, sx: i32, sy: i32,
+	ex: f32, ey: f32, ix: i32, iy: i32,
 }
 
-const LIMIT: f32 = 16777216.0;
-
 impl Iterator for LineTiles {
-	type Item = (usize, usize);
+	type Item = (i32, i32);
 	fn next(&mut self) -> Option<Self::Item> {
-		// TODO: ensure convergence for all cases
-		if self.ex.min(self.ey) <= self.len
-		&& self.ix != 16777216.0 && self.iy != 16777216.0 {
-			let old = Some((self.ix as usize, self.iy as usize));
+		if self.it <= self.len {
+			let old = Some((self.ix, self.iy));
+			self.it += 1;
 			if self.ex < self.ey {
-				self.ex = self.ex + self.dx;
-				self.ix = self.ix + self.sx;
+				self.ex += self.dx;
+				self.ix += self.sx;
 			} else {
-				self.ey = self.ey + self.dy;
-				self.iy = self.iy + self.sy;
+				self.ey += self.dy;
+				self.iy += self.sy;
 			}
+			// High precision tracing
+			let minimal = self.ex.min(self.ey);
+			self.ex -= minimal;
+			self.ey -= minimal;
 			old
 		} else {
 			None
@@ -146,10 +148,34 @@ impl Iterator for LineTiles {
 
 #[cfg(test)]
 mod tests {
+	use super::{Line, Point};
+	const UPPER_FLOAT: f32 = 16777216 as f32;
+	const LOWER_FLOAT: f32 = -16777216 as f32;
+
+	fn seq<I>(point: (f32, f32), iter: I) -> bool where I: Iterator<Item=(i32, i32)> {
+		Line::from_origin(Point(point.0, point.1)).supercover().eq(iter)
+	}
+
+	fn last(point: (i32, i32)) -> bool {
+		match
+			Line::from_origin(Point(point.0 as f32, point.1 as f32))
+				.supercover()
+				.last()
+				.map(|x| point.0 == x.0 && point.1 == x.1) {
+			Some(boolean) => boolean,
+			None => false,
+		}
+	}
+
 	#[test]
 	fn supercover() {
-		assert_eq!(super::MAX + 1.0, super::MAX);
-		assert_eq!(super::MIN - 1.0, super::MIN);
+		Line::from_origin(Point(1.501, 1.5))
+			.supercover()
+			.map(|x| println!("{:?}", x))
+			.count();
+		assert!(seq((10.0, 0.0), (0..11).map(|x| (x, 0))));
+		assert!(seq((0.0, 10.0), (0..11).map(|x| (0, x))));
+		assert!(last((1, 2)));
 	}
 
 }
