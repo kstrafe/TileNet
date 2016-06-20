@@ -169,13 +169,10 @@ mod tests {
 
 	#[test]
 	fn supercover() {
-		Line::from_origin(Point(1.501, 1.5))
-			.supercover()
-			.map(|x| println!("{:?}", x))
-			.count();
 		assert!(seq((10.0, 0.0), (0..11).map(|x| (x, 0))));
 		assert!(seq((0.0, 10.0), (0..11).map(|x| (0, x))));
 		assert!(last((1, 2)));
+		assert!(last((1, 16777216)));
 	}
 
 }
