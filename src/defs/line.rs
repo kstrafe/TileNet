@@ -67,30 +67,30 @@ impl Line {
 		let new = stop - start;
 		let (vx, vy) = (new.0, new.1);
 		let slope_x = 1.0 + vy*vy/vx/vx;
-		let slope_y = 1.0 + vy*vy/vx/vx;
+		let slope_y = 1.0 + vx*vx/vy/vy;
 		let (dx, dy) = (slope_x.sqrt(), slope_y.sqrt());
 
-		let (ix, iy) = (start.0.floor(), start.1.floor());
+		let (ix, iy) = (start.0.floor() as i32, start.1.floor() as i32);
 
 		let (sx, sy);
 		let (ex, ey);
 
 		if vx < 0.0 {
-			sx = -1.0; ex = (start.0 - ix)*dx;
+			sx = -1; ex = start.0.fract()*dx;
 		} else {
-			sx = 1.0; ex = (ix + 1.0 - start.0)*dx;
+			sx = 1; ex = (1.0 - start.0.fract())*dx;
 		}
 
 		if vy < 0.0 {
-			sy = -1.0; ey = (start.1 - iy)*dy;
+			sy = -1; ey = start.1.fract()*dy;
 		} else {
-			sy = 1.0; ey = (iy + 1.0 - start.1)*dy;
+			sy = 1; ey = (1.0 - start.1.fract())*dy;
 		}
 
-		let len = (vx*vx + vy*vy).sqrt();
+		let len = vx.abs().floor() as usize + vy.abs().floor() as usize;
 
 		LineTiles {
-			len: len, dx: dx, dy: dy, sx: sx, sy: sy,
+			it: 0, len: len, dx: dx, dy: dy, sx: sx, sy: sy,
 			ex: ex, ey: ey, ix: ix, iy: iy,
 		}
 	}
@@ -114,19 +114,17 @@ impl Line {
 /// ```
 #[derive(Clone)]
 pub struct LineTiles {
-	len: f32, dx: f32, dy: f32, sx: f32, sy: f32,
-	ex: f32, ey: f32, ix: f32, iy: f32,
+	it: usize, len: usize,
+	dx: f32, dy: f32, sx: i32, sy: i32,
+	ex: f32, ey: f32, ix: i32, iy: i32,
 }
 
-const LIMIT: f32 = 16777216.0;
-
 impl Iterator for LineTiles {
-	type Item = (usize, usize);
+	type Item = (i32, i32);
 	fn next(&mut self) -> Option<Self::Item> {
-		// TODO: ensure convergence for all cases
-		if self.ex.min(self.ey) <= self.len
-		&& self.ix != 16777216.0 && self.iy != 16777216.0 {
-			let old = Some((self.ix as usize, self.iy as usize));
+		if self.it <= self.len {
+			let old = Some((self.ix, self.iy));
+			self.it += 1;
 			if self.ex < self.ey {
 				self.ex = self.ex + self.dx;
 				self.ix = self.ix + self.sx;
@@ -146,38 +144,17 @@ mod tests {
 	use std::f32;
 	use super::{Line, Point};
 
+	fn seq<I>(point: (f32, f32), iter: I) -> bool where I: Iterator<Item=(i32, i32)> {
+		Line::from_origin(Point(point.0, point.1)).supercover().eq(iter)
+	}
+
 	#[test]
 	fn supercover() {
-		(0i32..360)
-			.map(|x| x as f32)
-			.map(|x| x*::std::f32::consts::PI/180.0)
-			.map(|x| Point(x.cos(), x.sin()))
-			.map(|x| Line::from_origin(x))
-			.map(|x| x.supercover())
-			.count();
-
-		(0i32..3600)
-			.map(|x| x as f32)
-			.map(|x| x*::std::f32::consts::PI/1800.0)
-			.map(|x| Point(2000.0*x.cos(), 3000.0*x.sin()))
-			.map(|x| Line::from_origin(x))
-			.map(|x| x.supercover())
-			.map(|x| x.count())
-			.count();
-
-		(0i32..).map(|x| (x as f32, x as f32 + 1.0))
-			.filter(|x| x.0 == x.1)
-			.take(2)
-			.inspect(|x| println!("{:?}", x))
-			.count();
-
-		(0i32..).map(|x| -x).map(|x| (x as f32, x as f32-1.0)).filter(|x| {
-			x.0 == x.1
-		}).take(2).inspect(|x| println!("{:?}", x)).count();
-
-		let x = 1.0;
-		println!("{}", 16777216 as f32);
-		assert_eq!(16777216 as f32 + x, 16777216 as f32);
+		for i in Line::from_origin(Point(10.9, 0.999)).supercover() {
+			println!("{:?}", i);
+		}
+		assert!(seq((10.0, 0.0), (0..11).map(|x| (x, 0))));
+		assert!(seq((0.0, 10.0), (0..11).map(|x| (0, x))));
 	}
 
 }
