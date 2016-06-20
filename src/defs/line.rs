@@ -90,7 +90,7 @@ impl Line {
 			sy = 1; ey = (1.0 - start.1.fract())*dy;
 		}
 
-		let len = vx.abs().floor() as usize + vy.abs().floor() as usize;
+		let len = vx.floor().abs() as usize + vy.floor().abs() as usize;
 
 		LineTiles {
 			it: 0, len: len, dx: dx, dy: dy, sx: sx, sy: sy,
@@ -169,10 +169,14 @@ mod tests {
 
 	#[test]
 	fn supercover() {
+		assert!(seq((0.0, -0.1), (0..2).map(|x| (0, -x))));
+		assert!(seq((0.0, 0.1), (0..1).map(|_| (0, 0))));
+		assert!(seq((0.9, 0.99), (0..1).map(|_| (0, 0))));
 		assert!(seq((10.0, 0.0), (0..11).map(|x| (x, 0))));
 		assert!(seq((0.0, 10.0), (0..11).map(|x| (0, x))));
 		assert!(last((1, 2)));
 		assert!(last((1, 16777216)));
+		assert!(last((1, 2)));
 	}
 
 }
