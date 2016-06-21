@@ -8,12 +8,16 @@ pub struct Rect {
 }
 
 impl Rect {
-	pub fn new(top_left: Point, width: f32, height: f32) -> Rect {
+	pub fn new(width: f32, height: f32) -> Rect {
 		Rect {
-			top_left: top_left,
+			top_left: Point(0.0, 0.0),
 			width: width,
 			height: height,
 		}
+	}
+
+	pub fn set_place(&mut self, top_left: Point) {
+		self.top_left = top_left;
 	}
 }
 
@@ -23,6 +27,6 @@ mod tests {
 
 	#[test]
 	fn test() {
-		let r = Rect::new(Point(1.0, 2.0), 1.0, 1.0);
+		Rect::new(2.0, 1.0);
 	}
 }
