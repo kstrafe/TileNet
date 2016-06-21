@@ -1,4 +1,4 @@
-pub use super::{Index, Point, Quadrant};
+pub use super::{Point, Quadrant};
 
 const MAX: f32 = 16777216 as f32;
 const MIN: f32 = -16777216 as f32;

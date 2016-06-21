@@ -1,4 +1,3 @@
-use super::Index;
 use std::ops::{Add, Sub};
 
 /// Describe a point in 2-space
@@ -14,12 +13,6 @@ use std::ops::{Add, Sub};
 /// ```
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Point(pub f32, pub f32);
-
-impl Point {
-	pub fn to_index(&self) -> Index {
-		Index(self.0.floor() as usize, self.1.floor() as usize)
-	}
-}
 
 impl Add for Point {
 	type Output = Point;

@@ -4,7 +4,7 @@
 
 mod defs;
 
-pub use defs::{Index, Line, Point, Quadrant};
+pub use defs::{Line, Point, Quadrant};
 
 /// Tile iterator returning tiles from the `tile_net::TileNet`.
 ///
@@ -224,7 +224,7 @@ impl<T> TileNet<T> where T: Clone + std::fmt::Debug {
 
 #[cfg(test)]
 mod tests {
-	use super::{Index, Line, TileNet, Point};
+	use super::{Line, TileNet, Point};
 
 	#[test]
 	fn get() {

@@ -1,23 +1,9 @@
 pub mod line;
 pub mod point;
+pub mod rectangle;
 
 pub use self::line::Line;
 pub use self::point::Point;
-
-/// Index for a tile in a 2D map
-///
-/// An index represents a location in a 2D integer
-/// bounded map. Only positive integers are allowed because
-/// the ideal map in this library is positive.
-///
-/// ```
-/// use tile_net::Index;
-/// let index = Index(10, 50);
-/// assert_eq!(index.0, 10);
-/// assert_eq!(index.1, 50);
-/// ```
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub struct Index(pub usize, pub usize);
 
 /// Descriptor denoting the quadrant
 /// of a point or line.
