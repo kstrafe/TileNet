@@ -4,7 +4,7 @@
 
 mod defs;
 
-pub use defs::{Line, Point, Quadrant};
+pub use defs::{Rect, Line, Point, Quadrant};
 
 /// Tile iterator returning tiles from the `tile_net::TileNet`.
 ///
@@ -219,6 +219,15 @@ impl<T> TileNet<T> where T: Clone + std::fmt::Debug {
 			tilenet: self,
 			points: list,
 		}
+	}
+
+	pub fn collision_between<'a, I>(&'a self, rect_a: &Rect, rect_b: &Rect) -> TileSet<'a, T, I>
+	where I: Iterator<Item=(i32, i32)> {
+		unimplemented!();
+		// find all points in rect_a
+		// find all points in rect_b
+		// find all points from respective points of rectangles
+		// Return the tileset of those points
 	}
 }
 

@@ -19,7 +19,13 @@ impl Rect {
 	pub fn set_place(&mut self, top_left: Point) {
 		self.top_left = top_left;
 	}
+
+	pub fn supercover(&self) -> RectTiles {
+		RectTiles
+	}
 }
+
+pub struct RectTiles;
 
 #[cfg(test)]
 mod tests {

@@ -4,6 +4,7 @@ pub mod rectangle;
 
 pub use self::line::Line;
 pub use self::point::Point;
+pub use self::rectangle::Rect;
 
 /// Descriptor denoting the quadrant
 /// of a point or line.
