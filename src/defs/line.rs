@@ -142,12 +142,13 @@ pub struct LineTiles {
 
 impl LineTiles {
 	fn minimize_distance_from_zero(&mut self) {
-		let minimal = self.ex.min(self.ey);
-		self.ex -= minimal;
-		self.ey -= minimal;
+		// let minimal = self.ex.min(self.ey);
+		// self.ex -= minimal;
+		// self.ey -= minimal;
 	}
 
 	fn step_to_next_tile(&mut self) {
+		// This algorithm gives top-bias
 		if self.ex < self.ey {
 			self.ex += self.dx;
 			self.ix += self.sx;
@@ -162,8 +163,8 @@ impl Iterator for LineTiles {
 	type Item = (i32, i32);
 	fn next(&mut self) -> Option<Self::Item> {
 		if self.it < self.len {
-			let old = Some((self.ix, self.iy));
 			self.it += 1;
+			let old = Some((self.ix, self.iy));
 			self.step_to_next_tile();
 			self.minimize_distance_from_zero();
 			old
@@ -200,6 +201,7 @@ mod tests {
 
 	#[test]
 	fn supercover() {
+		assert!(seq((-2.0, 0.0), (0..3).map(|x| (-x, 0))));
 		assert!(seq((0.0, -0.1), (0..2).map(|x| (0, -x))));
 		assert!(seq((0.0, 0.1), (0..1).map(|_| (0, 0))));
 		assert!(seq((0.9, 0.99), (0..1).map(|_| (0, 0))));
@@ -207,6 +209,9 @@ mod tests {
 		assert!(seq((0.9999, 1.00001), (0..2).map(|x| (0, x))));
 		assert!(seq((10.0, 0.0), (0..11).map(|x| (x, 0))));
 		assert!(seq((0.0, 10.0), (0..11).map(|x| (0, x))));
+		assert!(seq((1.0, 20000000.0), (0..20000001).map(|x| (0, x)).chain((0..1).map(|_| (1, 20000000)))));
+		assert!(seq((-1.0, 20000000.0), (0..1).map(|_| (0, 0)).chain((0..20000001).map(|x| (-1, x)))));
+		assert!(seq((1.0, -20000000.0), (0..20000001).map(|x| (0, -x)).chain((0..1).map(|_| (1, -20000000)))));
 		assert!(last((1, 2)));
 		assert!(last((1, 16777216)));
 		assert!(last((1, 2)));
