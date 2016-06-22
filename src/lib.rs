@@ -33,14 +33,14 @@ pub use defs::{Rect, Line, Point, Quadrant};
 /// initialize_map(&mut map);
 /// 'main: loop {
 /// 	handle_events(&mut world);
-/// 		// Physics for collidable units
-/// 		for coll in world.collidables_mut() {
-/// 			match map.collides(coll) {
-/// 				TileNet::NoCollision => coll.allow_move(),
-/// 				TileNet::XCollision => coll.allow_move_y(),
-/// 				TileNet::YCollision => coll.allow_move_x(),
-/// 				TileNet::FullCollision => ,
-/// 			}
+/// 	// Physics for collidable units
+/// 	for coll in world.collidables_mut() {
+/// 		match map.collides(coll) {
+/// 			TileNet::NoCollision => coll.allow_move(),
+/// 			TileNet::XCollision => coll.allow_move_y(),
+/// 			TileNet::YCollision => coll.allow_move_x(),
+/// 			TileNet::FullCollision => ,
+/// 		}
 ///   }
 /// }
 /// ```
