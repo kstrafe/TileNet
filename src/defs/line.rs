@@ -19,7 +19,6 @@ const MIN: f32 = -16777216 as f32;
 pub struct Line(pub Point, pub Point);
 
 impl Line {
-
 	/// Create a line using its end-point, starting in (0, 0)
 	pub fn from_origin(p: Point) -> Line {
 		Line(Point(0.0, 0.0), p)
@@ -36,14 +35,11 @@ impl Line {
 	/// assert_eq!(Line::from_origin(Point(-3.0, 0.0)).quadrant(), Quadrant::Three);
 	/// ```
 	pub fn quadrant(&self) -> Quadrant {
-		if (self.1).0 <= (self.0).0 &&
-		(self.1).1 > (self.0).1 {
+		if (self.1).0 <= (self.0).0 && (self.1).1 > (self.0).1 {
 			Quadrant::Two
-		} else if (self.1).0 < (self.0).0 &&
-		(self.1).1 <= (self.0).1 {
+		} else if (self.1).0 < (self.0).0 && (self.1).1 <= (self.0).1 {
 			Quadrant::Three
-		} else if (self.1).0 >= (self.0).0 &&
-		(self.1).1 < (self.0).1 {
+		} else if (self.1).0 >= (self.0).0 && (self.1).1 < (self.0).1 {
 			Quadrant::Four
 		} else {
 			Quadrant::One
@@ -69,8 +65,8 @@ impl Line {
 		let (start, stop) = (self.0, self.1);
 		let new = stop - start;
 		let (vx, vy) = (new.0, new.1);
-		let slope_x = 1.0 + vy*vy/vx/vx;
-		let slope_y = 1.0 + vx*vx/vy/vy;
+		let slope_x = 1.0 + vy * vy / vx / vx;
+		let slope_y = 1.0 + vx * vx / vy / vy;
 		let (dx, dy) = (slope_x.sqrt(), slope_y.sqrt());
 
 		let (ix, iy) = (start.0.floor() as i32, start.1.floor() as i32);
@@ -79,25 +75,36 @@ impl Line {
 		let (ex, ey);
 
 		if vx < 0.0 {
-			sx = -1; ex = start.0.fract()*dx;
+			sx = -1;
+			ex = start.0.fract() * dx;
 		} else {
-			sx = 1; ex = (1.0 - start.0.fract())*dx;
+			sx = 1;
+			ex = (1.0 - start.0.fract()) * dx;
 		}
 
 		if vy < 0.0 {
-			sy = -1; ey = start.1.fract()*dy;
+			sy = -1;
+			ey = start.1.fract() * dy;
 		} else {
-			sy = 1; ey = (1.0 - start.1.fract())*dy;
+			sy = 1;
+			ey = (1.0 - start.1.fract()) * dy;
 		}
 
 		let len = vx.floor().abs() as usize + vy.floor().abs() as usize;
 
 		LineTiles {
-			it: 0, len: len, dx: dx, dy: dy, sx: sx, sy: sy,
-			ex: ex, ey: ey, ix: ix, iy: iy,
+			it: 0,
+			len: len,
+			dx: dx,
+			dy: dy,
+			sx: sx,
+			sy: sy,
+			ex: ex,
+			ey: ey,
+			ix: ix,
+			iy: iy,
 		}
 	}
-
 }
 
 /// Iterator for traversing from one point on the line
@@ -112,14 +119,21 @@ impl Line {
 /// let line = Line(Point(0.8, 10.3), Point(-30.0, 5.9));
 /// let tiles = line.supercover();
 /// for tile in tiles {
-///		println!("{:?}", tile);
+/// 		println!("{:?}", tile);
 /// }
 /// ```
 #[derive(Clone)]
 pub struct LineTiles {
-	it: usize, len: usize,
-	dx: f32, dy: f32, sx: i32, sy: i32,
-	ex: f32, ey: f32, ix: i32, iy: i32,
+	it: usize,
+	len: usize,
+	dx: f32,
+	dy: f32,
+	sx: i32,
+	sy: i32,
+	ex: f32,
+	ey: f32,
+	ix: i32,
+	iy: i32,
 }
 
 impl Iterator for LineTiles {
@@ -152,16 +166,17 @@ mod tests {
 	const UPPER_FLOAT: f32 = 16777216 as f32;
 	const LOWER_FLOAT: f32 = -16777216 as f32;
 
-	fn seq<I>(point: (f32, f32), iter: I) -> bool where I: Iterator<Item=(i32, i32)> {
+	fn seq<I>(point: (f32, f32), iter: I) -> bool
+		where I: Iterator<Item = (i32, i32)>
+	{
 		Line::from_origin(Point(point.0, point.1)).supercover().eq(iter)
 	}
 
 	fn last(point: (i32, i32)) -> bool {
-		match
-			Line::from_origin(Point(point.0 as f32, point.1 as f32))
-				.supercover()
-				.last()
-				.map(|x| point.0 == x.0 && point.1 == x.1) {
+		match Line::from_origin(Point(point.0 as f32, point.1 as f32))
+			.supercover()
+			.last()
+			.map(|x| point.0 == x.0 && point.1 == x.1) {
 			Some(boolean) => boolean,
 			None => false,
 		}

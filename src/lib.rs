@@ -21,17 +21,22 @@ pub use defs::{Rect, Line, Point, Quadrant};
 /// let cover = line.supercover();
 /// let set = map.collide_set(cover);
 /// for tile in set {
-///		println!("{:?}", tile);
+/// 		println!("{:?}", tile);
 /// }
 /// ```
 #[derive(Clone)]
-pub struct TileSet<'a, T, I> where T: 'a + Clone + std::fmt::Debug, I: Iterator<Item=(i32, i32)> {
+pub struct TileSet<'a, T, I>
+	where T: 'a + Clone + std::fmt::Debug,
+	      I: Iterator<Item = (i32, i32)>
+{
 	tilenet: &'a TileNet<T>,
 	points: I,
 }
 
-impl<'a, T, I> Iterator for TileSet<'a, T, I> where T: 'a + Clone + std::fmt::Debug,
-I: Iterator<Item=(i32, i32)> {
+impl<'a, T, I> Iterator for TileSet<'a, T, I>
+	where T: 'a + Clone + std::fmt::Debug,
+	      I: Iterator<Item = (i32, i32)>
+{
 	type Item = &'a Option<T>;
 	fn next(&mut self) -> Option<Self::Item> {
 		if let Some(point) = self.points.next() {
@@ -47,7 +52,9 @@ I: Iterator<Item=(i32, i32)> {
 }
 
 impl<'a, T, I> std::fmt::Debug for TileSet<'a, T, I>
-where T: 'a + Clone + std::fmt::Debug, I: Clone + Iterator<Item=(i32, i32)> {
+	where T: 'a + Clone + std::fmt::Debug,
+	      I: Clone + Iterator<Item = (i32, i32)>
+{
 	fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
 		let viewer = self.clone();
 		for tile in viewer {
@@ -59,13 +66,17 @@ where T: 'a + Clone + std::fmt::Debug, I: Clone + Iterator<Item=(i32, i32)> {
 
 /// Tile iterator for a rectangular view of the `tile_net::TileNet`.
 #[derive(Clone)]
-pub struct TileView<'a, T> where T: 'a + Clone + std::fmt::Debug {
+pub struct TileView<'a, T>
+	where T: 'a + Clone + std::fmt::Debug
+{
 	tilenet: &'a TileNet<T>,
 	rectangle: (usize, usize, usize, usize),
 	current: (usize, usize),
 }
 
-impl<'a, T> Iterator for TileView<'a, T> where T: 'a + Clone + std::fmt::Debug {
+impl<'a, T> Iterator for TileView<'a, T>
+    where T: 'a + Clone + std::fmt::Debug
+{
 	type Item = &'a Option<T>;
 	fn next(&mut self) -> Option<Self::Item> {
 		if self.current.1 >= self.rectangle.3 {
@@ -82,7 +93,9 @@ impl<'a, T> Iterator for TileView<'a, T> where T: 'a + Clone + std::fmt::Debug {
 	}
 }
 
-impl<'a, T: 'a + std::fmt::Debug> std::fmt::Debug for TileView<'a, T> where T: Clone {
+impl<'a, T: 'a + std::fmt::Debug> std::fmt::Debug for TileView<'a, T>
+    where T: Clone
+{
 	fn fmt(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
 		let biggest = self.clone().map(|x| format!("{:?}", x).len()).max();
 		let viewer = self.clone();
@@ -94,7 +107,7 @@ impl<'a, T: 'a + std::fmt::Debug> std::fmt::Debug for TileView<'a, T> where T: C
 			let mut current = format!("{:?}", tile);
 			let length = current.len();
 			if let Some(biggest) = biggest {
-				(0..biggest-length).map(|_| current.push(' ')).count();
+				(0..biggest - length).map(|_| current.push(' ')).count();
 			}
 			try!(write!(formatter, "{} ", current));
 		}
@@ -118,7 +131,7 @@ impl<T: std::fmt::Debug> std::fmt::Debug for TileNet<T> {
 			let mut current = format!("{:?}", tile);
 			let length = current.len();
 			if let Some(biggest) = biggest {
-				(0..biggest-length).map(|_| current.push(' ')).count();
+				(0..biggest - length).map(|_| current.push(' ')).count();
 			}
 			try!(write!(formatter, "{} ", current));
 		}
@@ -128,11 +141,18 @@ impl<T: std::fmt::Debug> std::fmt::Debug for TileNet<T> {
 
 impl TileNet<usize> {
 	pub fn sample() -> TileNet<usize> {
-		TileNet::from_iter(10, (1..101).map(|x| if x > 50 { Some(x) } else { None }))
+		TileNet::from_iter(10,
+		                   (1..101).map(|x| if x > 50 {
+			                   Some(x)
+			                  } else {
+			                   None
+			                  }))
 	}
 }
 
-impl<T> TileNet<T> where T: Clone + std::fmt::Debug {
+impl<T> TileNet<T>
+    where T: Clone + std::fmt::Debug
+{
 	pub fn new(m: (usize, usize)) -> TileNet<T> {
 		TileNet {
 			map: vec![None; m.0*m.1],
@@ -141,7 +161,8 @@ impl<T> TileNet<T> where T: Clone + std::fmt::Debug {
 	}
 
 	pub fn from_iter<I>(columns: usize, iter: I) -> TileNet<T>
-	where I: Iterator<Item=Option<T>> {
+		where I: Iterator<Item = Option<T>>
+	{
 		let mut tilenet = TileNet {
 			map: vec![],
 			cols: columns,
@@ -149,7 +170,7 @@ impl<T> TileNet<T> where T: Clone + std::fmt::Debug {
 		tilenet.map.extend(iter);
 		let remainder = tilenet.map.len() % tilenet.cols;
 		if remainder != 0 {
-			for _ in 0..tilenet.cols-remainder {
+			for _ in 0..tilenet.cols - remainder {
 				tilenet.map.push(None);
 			}
 		}
@@ -157,7 +178,7 @@ impl<T> TileNet<T> where T: Clone + std::fmt::Debug {
 	}
 
 	pub fn get_size(&self) -> (usize, usize) {
-		(self.map.len()/self.cols, self.cols)
+		(self.map.len() / self.cols, self.cols)
 	}
 
 	pub fn view_box(&self, rectangle: (usize, usize, usize, usize)) -> TileView<T> {
@@ -189,7 +210,7 @@ impl<T> TileNet<T> where T: Clone + std::fmt::Debug {
 		if p.0 >= self.cols {
 			None
 		} else {
-			self.map.get(p.0 + p.1*self.cols)
+			self.map.get(p.0 + p.1 * self.cols)
 		}
 	}
 
@@ -197,7 +218,7 @@ impl<T> TileNet<T> where T: Clone + std::fmt::Debug {
 		if p.0 >= self.cols {
 			None
 		} else {
-			self.map.get_mut(p.0 + p.1*self.cols)
+			self.map.get_mut(p.0 + p.1 * self.cols)
 		}
 	}
 
@@ -209,12 +230,14 @@ impl<T> TileNet<T> where T: Clone + std::fmt::Debug {
 	}
 
 	pub fn any_occupied<I>(&self, mut list: I) -> bool
-	where I: Iterator<Item=(usize, usize)> {
+		where I: Iterator<Item = (usize, usize)>
+	{
 		list.any(|p| self.is_occupied(p))
 	}
 
 	pub fn collide_set<'a, I>(&'a self, list: I) -> TileSet<'a, T, I>
-	where I: Iterator<Item=(i32, i32)> {
+		where I: Iterator<Item = (i32, i32)>
+	{
 		TileSet {
 			tilenet: self,
 			points: list,
@@ -222,7 +245,8 @@ impl<T> TileNet<T> where T: Clone + std::fmt::Debug {
 	}
 
 	pub fn collision_between<'a, I>(&'a self, rect_a: &Rect, rect_b: &Rect) -> TileSet<'a, T, I>
-	where I: Iterator<Item=(i32, i32)> {
+		where I: Iterator<Item = (i32, i32)>
+	{
 		unimplemented!();
 		// find all points in rect_a
 		// find all points in rect_b
@@ -279,13 +303,13 @@ mod tests {
 			let element = map.get_mut((9, 9));
 			*element.unwrap() = Some(0);
 		}
-		assert_eq!(true, map.any_occupied(vec![
+		assert_eq!(true,
+		           map.any_occupied(vec![
 			(9, 9),
 			(10, 0),
-		].into_iter()));
-		assert_eq!(false, map.any_occupied(
-			(0..10).map(|x| (0, x))
-		));
+		]
+			           .into_iter()));
+		assert_eq!(false, map.any_occupied((0..10).map(|x| (0, x))));
 	}
 
 	#[test]
@@ -300,7 +324,10 @@ mod tests {
 	fn from_iter_and_view_box() {
 		let map: TileNet<usize> = TileNet::from_iter(10, (1..101).map(|x| Some(x)));
 		let mut view = map.view_box((3, 8, 1, 4));
-		(14usize..19).chain((24..29)).chain((34..39)).map(|x| assert_eq!(view.next().unwrap(), &Some(x)))
+		(14usize..19)
+			.chain((24..29))
+			.chain((34..39))
+			.map(|x| assert_eq!(view.next().unwrap(), &Some(x)))
 			.count();
 	}
 
@@ -308,7 +335,11 @@ mod tests {
 	fn from_iter_with_remainder() {
 		let map: TileNet<usize> = TileNet::from_iter(10, (1..25).map(|x| Some(x)));
 		let mut view = map.view_box((0, 10, 0, 3));
-		for x in (1..31).map(|x| if x >= 25 { None } else { Some(x) }) {
+		for x in (1..31).map(|x| if x >= 25 {
+			None
+		} else {
+			Some(x)
+		}) {
 			assert_eq!(view.next().unwrap(), &x);
 		}
 
@@ -321,13 +352,18 @@ mod tests {
 
 	#[test]
 	fn collide_set() {
-		let map: TileNet<usize> = TileNet::from_iter(10, (1..101).map(|x| if x > 50 { Some(x) } else { None }));
+		let map: TileNet<usize> = TileNet::from_iter(10,
+		                                             (1..101).map(|x| if x > 50 {
+			                                             Some(x)
+			                                            } else {
+			                                             None
+			                                            }));
 		let mut set = map.collide_set((3..7).map(|x| (4, x)));
 		for _ in 1..3 {
 			assert_eq!(set.next().unwrap(), &None);
 		}
 		for x in 0..2 {
-			assert_eq!(set.next().unwrap(), &Some(55 + 10*x));
+			assert_eq!(set.next().unwrap(), &Some(55 + 10 * x));
 		}
 	}
 
