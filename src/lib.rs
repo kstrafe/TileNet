@@ -6,6 +6,13 @@ mod defs;
 
 pub use defs::{Rect, Line, Point, Quadrant};
 
+/*
+impl TileBased for Character {
+	fn lines(&mut self, ) -> Option<Line>;
+	fn queue_move(&mut self, );
+	fn exec_move(&mut self, tiles: Iterator<Item=Tile>);
+}
+*/
 /// Tile iterator returning tiles from the `tile_net::TileNet`.
 ///
 /// ```
