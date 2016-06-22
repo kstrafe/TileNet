@@ -103,6 +103,8 @@ impl Line {
 			ey: ey,
 			ix: ix,
 			iy: iy,
+			dest_x: stop.0.floor() as i32,
+			dest_y: stop.1.floor() as i32,
 		}
 	}
 }
@@ -134,6 +136,8 @@ pub struct LineTiles {
 	ey: f32,
 	ix: i32,
 	iy: i32,
+	dest_x: i32,
+	dest_y: i32,
 }
 
 impl LineTiles {
@@ -157,12 +161,15 @@ impl LineTiles {
 impl Iterator for LineTiles {
 	type Item = (i32, i32);
 	fn next(&mut self) -> Option<Self::Item> {
-		if self.it <= self.len {
+		if self.it < self.len {
 			let old = Some((self.ix, self.iy));
 			self.it += 1;
 			self.step_to_next_tile();
 			self.minimize_distance_from_zero();
 			old
+		} else if self.it == self.len {
+			self.it += 1;
+			Some((self.dest_x, self.dest_y))
 		} else {
 			None
 		}
