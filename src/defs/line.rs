@@ -46,7 +46,7 @@ impl Line {
 		}
 	}
 
-	/// Create a supercover line
+	/// Create a supercover line iterator
 	///
 	/// The supercover line covers all discrete blocks.
 	/// It's similar to Bresenham's algorithm, but it includes the
@@ -136,23 +136,32 @@ pub struct LineTiles {
 	iy: i32,
 }
 
+impl LineTiles {
+	fn minimize_distance_from_zero(&mut self) {
+		let minimal = self.ex.min(self.ey);
+		self.ex -= minimal;
+		self.ey -= minimal;
+	}
+
+	fn step_to_next_tile(&mut self) {
+		if self.ex < self.ey {
+			self.ex += self.dx;
+			self.ix += self.sx;
+		} else {
+			self.ey += self.dy;
+			self.iy += self.sy;
+		}
+	}
+}
+
 impl Iterator for LineTiles {
 	type Item = (i32, i32);
 	fn next(&mut self) -> Option<Self::Item> {
 		if self.it <= self.len {
 			let old = Some((self.ix, self.iy));
 			self.it += 1;
-			if self.ex < self.ey {
-				self.ex += self.dx;
-				self.ix += self.sx;
-			} else {
-				self.ey += self.dy;
-				self.iy += self.sy;
-			}
-			// High precision tracing
-			let minimal = self.ex.min(self.ey);
-			self.ex -= minimal;
-			self.ey -= minimal;
+			self.step_to_next_tile();
+			self.minimize_distance_from_zero();
 			old
 		} else {
 			None

@@ -21,7 +21,7 @@ pub use defs::{Rect, Line, Point, Quadrant};
 /// let cover = line.supercover();
 /// let set = map.collide_set(cover);
 /// for tile in set {
-/// 		println!("{:?}", tile);
+/// 	println!("{:?}", tile);
 /// }
 /// ```
 #[derive(Clone)]
@@ -115,6 +115,18 @@ impl<'a, T: 'a + std::fmt::Debug> std::fmt::Debug for TileView<'a, T>
 	}
 }
 
+/// `TileNet` is the main class in this library
+///
+/// It represents a 2D space with dimensions rows x columns.
+/// Each index represents a point in space. Row 'n' and column 'm' denote the tile
+/// from x from n inclusive to n+1 exclusive, and y from m inclusive to  m+1 exclusive.
+///
+/// ```
+/// use tile_net::TileNet;
+/// #[derive(Clone)]
+/// struct Example(i32);
+/// let my_net = TileNet::<Example>::new((10, 10));
+/// ```
 #[derive(Clone)]
 pub struct TileNet<T> {
 	map: Vec<Option<T>>,
@@ -151,7 +163,7 @@ impl TileNet<usize> {
 }
 
 impl<T> TileNet<T>
-    where T: Clone + std::fmt::Debug
+    where T: Clone
 {
 	pub fn new(m: (usize, usize)) -> TileNet<T> {
 		TileNet {
@@ -159,7 +171,11 @@ impl<T> TileNet<T>
 			cols: m.1,
 		}
 	}
+}
 
+impl<T> TileNet<T>
+    where T: Clone + std::fmt::Debug
+{
 	pub fn from_iter<I>(columns: usize, iter: I) -> TileNet<T>
 		where I: Iterator<Item = Option<T>>
 	{

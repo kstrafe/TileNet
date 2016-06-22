@@ -1,5 +1,7 @@
 all:
 	cargo doc
-	cargo fmt -- --write-mode overwrite
 	cargo build
-	cargo test -- --nocapture
+	bash -c 'if ! cargo test -- --nocapture > /tmp/cargout; then cat /tmp/cargout; fi'
+
+fmt:
+	cargo fmt -- --write-mode diff
