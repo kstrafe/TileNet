@@ -201,6 +201,7 @@ mod tests {
 
 	#[test]
 	fn supercover() {
+		assert!(seq((2.0, 2.0), vec![(0i32, 0i32), (0, 1), (1, 1), (1, 2), (2, 2)].iter().map(|x| *x)));
 		assert!(seq((-2.0, 0.0), (0..3).map(|x| (-x, 0))));
 		assert!(seq((0.0, -0.1), (0..2).map(|x| (0, -x))));
 		assert!(seq((0.0, 0.1), (0..1).map(|_| (0, 0))));
