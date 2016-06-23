@@ -7,7 +7,7 @@ pub use self::vector::Vector;
 pub use self::rectangle::Rect;
 
 /// Descriptor denoting the quadrant
-/// of a point or line.
+/// of a `Vector` or `Line`.
 ///
 /// The quadrant of a line is taken
 /// with the starting point as origin.

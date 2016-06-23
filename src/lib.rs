@@ -1,11 +1,30 @@
 #![allow(dead_code)]
-//! TileNet holds integer aligned tiles for broad phase continuous collision detection
+//! TileNet holds integer aligned tiles for broad phase continuous collision detection.
+//! The purpose of TileNet is to have a solid, tile-based, continuous, simple collision
+//! library for aspiring game programmers.
 //!
+//! # How it works #
+//! The library is built on the DDA Supercover algorithm, which is an extension of
+//! Bresenham's algorithm. For each point moving, it creates a line. Each line's
+//! overlapping tiles are reported. Your dynamic object decides how it should move.
+//! It may adjust speed, and retry the collision. It may also accept and move.
+//!
+//! # Limitations #
+//! The library will experience problems with huge coordinates. This is because adding
+//! a small increment to a floating point above 2^24 may not register at all. Precision
+//! becomes worse as you approach 2^24. The technical reason is that a 32-bit float
+//! has 24 bits in its mantissa.
+//!
+//! # Example #
+//! ```ignore
+//! Work in progress...
+//! ```
 
 mod defs;
 mod collable;
 
 pub use defs::{Rect, Line, Vector, Quadrant};
+pub use collable::Collable;
 
 macro_rules! run {
 	($x:block until $y:expr) => {{
