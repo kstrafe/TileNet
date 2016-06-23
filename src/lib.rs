@@ -3,16 +3,29 @@
 //!
 
 mod defs;
+mod collable;
 
 pub use defs::{Rect, Line, Point, Quadrant};
 
-/*
-impl TileBased for Character {
-	fn lines(&mut self, ) -> Option<Line>;
-	fn queue_move(&mut self, );
-	fn exec_move(&mut self, tiles: Iterator<Item=Tile>);
+macro_rules! run {
+	($x:block until $y:expr) => {{
+		while {
+			$x;
+			!$y
+		} {}
+	}}
 }
-*/
+
+// impl TileBased for Character {
+// /// Get all the points of the object that need to be used in collision
+// fn points(&self) -> PointSet;
+// /// Queue a movement: translate all points by vector
+// fn queue_move(&mut self, vector: Vector);
+// fn queued_move(&self) -> Vector;
+// /// Resolve the collision
+// fn resolve_move(&mut self, TileSet<T>) -> bool;
+// }
+//
 /// Tile iterator returning tiles from the `tile_net::TileNet`.
 ///
 /// ```
@@ -41,14 +54,15 @@ impl TileBased for Character {
 /// 'main: loop {
 /// 	handle_events(&mut world);
 /// 	// Physics for collidable units
-/// 	for coll in world.collidables_mut() {
-/// 		match map.collides(coll) {
-/// 			TileNet::NoCollision => coll.allow_move(),
-/// 			TileNet::XCollision => coll.allow_move_y(),
-/// 			TileNet::YCollision => coll.allow_move_x(),
-/// 			TileNet::FullCollision => ,
-/// 		}
-///   }
+/// 		run!(
+/// 		{
+/// 			for coll in world.collidables_mut() {
+/// 				match map.collides(coll) {
+/// 					TileNet::NoCollision => coll.allow_move(),
+/// 					TileNet::Collision(collset) => coll.deny_move(&collset),
+/// 				}
+/// 			}
+///   } until TileBased::is_resolved(&coll));
 /// }
 /// ```
 #[derive(Clone)]
