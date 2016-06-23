@@ -1,9 +1,8 @@
 use std::fmt;
-mod tilenet;
-
 pub use super::Rect;
-
 pub use self::tilenet::TileNet;
+
+mod tilenet;
 
 
 // impl TileBased for Character {
@@ -57,15 +56,14 @@ pub use self::tilenet::TileNet;
 /// ```
 #[derive(Clone)]
 pub struct TileSet<'a, T, I>
-	where T: 'a + Clone + fmt::Debug,
-	      I: Iterator<Item = (i32, i32)>
+	where T: 'a
 {
 	tilenet: &'a TileNet<T>,
 	points: I,
 }
 
 impl<'a, T, I> Iterator for TileSet<'a, T, I>
-	where T: 'a + Clone + fmt::Debug,
+	where T: 'a,
 	      I: Iterator<Item = (i32, i32)>
 {
 	type Item = &'a Option<T>;
@@ -96,9 +94,13 @@ impl<'a, T, I> fmt::Debug for TileSet<'a, T, I>
 }
 
 /// Tile iterator for a rectangular view of the `tile_net::TileNet`.
+///
+/// Used to cull the amount of tiles to draw. You provide it with a desired
+/// rectangle, and the tileview will be your iterator iterating over only
+/// the desired tiles.
 #[derive(Clone)]
 pub struct TileView<'a, T>
-	where T: 'a + Clone + fmt::Debug
+	where T: 'a
 {
 	tilenet: &'a TileNet<T>,
 	rectangle: (usize, usize, usize, usize),
@@ -106,7 +108,7 @@ pub struct TileView<'a, T>
 }
 
 impl<'a, T> Iterator for TileView<'a, T>
-    where T: 'a + Clone + fmt::Debug
+    where T: 'a
 {
 	type Item = &'a Option<T>;
 	fn next(&mut self) -> Option<Self::Item> {
@@ -124,8 +126,8 @@ impl<'a, T> Iterator for TileView<'a, T>
 	}
 }
 
-impl<'a, T: 'a + fmt::Debug> fmt::Debug for TileView<'a, T>
-    where T: Clone
+impl<'a, T> fmt::Debug for TileView<'a, T>
+    where T: 'a + Clone + fmt::Debug
 {
 	fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
 		let biggest = self.clone().map(|x| format!("{:?}", x).len()).max();

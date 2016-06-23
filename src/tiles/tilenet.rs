@@ -1,5 +1,4 @@
 use std::fmt;
-
 use super::{TileView, TileSet, Rect};
 
 /// `TileNet` is the main class in this library
@@ -58,11 +57,26 @@ impl<T> TileNet<T>
 			cols: m.1,
 		}
 	}
+
+	pub fn resize(&mut self, m: (usize, usize)) {
+		let mut new_map: Vec<Option<T>> = vec![None; m.0*m.1];
+		let new_cols = m.1;
+		let new_rows = new_map.len() / new_cols;
+
+		self.map.iter()
+			.enumerate()
+			.map(|x| (x.0 % self.cols, x.0 / self.cols, x.1))
+			.filter(|x| x.0 < new_cols && x.1 < new_rows)
+			// .inspect(|x| println!("{:?}", x))
+			.inspect(|x| *new_map.get_mut(x.0 + x.1*new_cols).unwrap() = x.2.clone())
+			.count();
+
+		self.map = new_map;
+		self.cols = new_cols;
+	}
 }
 
-impl<T> TileNet<T>
-    where T: Clone + fmt::Debug
-{
+impl<T> TileNet<T> {
 	pub fn from_iter<I>(columns: usize, iter: I) -> TileNet<T>
 		where I: Iterator<Item = Option<T>>
 	{
@@ -90,23 +104,6 @@ impl<T> TileNet<T>
 			rectangle: rectangle,
 			current: (rectangle.0, rectangle.2),
 		}
-	}
-
-	pub fn resize(&mut self, m: (usize, usize)) {
-		let mut new_map: Vec<Option<T>> = vec![None; m.0*m.1];
-		let new_cols = m.1;
-		let new_rows = new_map.len() / new_cols;
-
-		self.map.iter()
-			.enumerate()
-			.map(|x| (x.0 % self.cols, x.0 / self.cols, x.1))
-			.filter(|x| x.0 < new_cols && x.1 < new_rows)
-			// .inspect(|x| println!("{:?}", x))
-			.inspect(|x| *new_map.get_mut(x.0 + x.1*new_cols).unwrap() = x.2.clone())
-			.count();
-
-		self.map = new_map;
-		self.cols = new_cols;
 	}
 
 	pub fn get(&self, p: (usize, usize)) -> Option<&Option<T>> {
@@ -157,5 +154,3 @@ impl<T> TileNet<T>
 		// Return the tileset of those points
 	}
 }
-
-
