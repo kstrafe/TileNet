@@ -1,27 +1,27 @@
-pub use super::{Vector, Quadrant};
+pub use super::{Point, Quadrant};
 
 const MAX: f32 = 16777216 as f32;
 const MIN: f32 = -16777216 as f32;
 
-/// Describe a line by its start and end `Vector` respectively
+/// Describe a line by its start and end `Point` respectively
 ///
 /// A line can be constructed and used with tuples
 ///
 /// ```
-/// use tile_net::{Line, Vector};
-/// let start = Vector(0.5, 1.0);
-/// let finish = Vector(1.2, -1.0);
+/// use tile_net::{Line, Point};
+/// let start = Point(0.5, 1.0);
+/// let finish = Point(1.2, -1.0);
 /// let line = Line(start, finish);
 /// assert_eq!(line.0, start);
 /// assert_eq!(line.1, finish);
 /// ```
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub struct Line(pub Vector, pub Vector);
+pub struct Line(pub Point, pub Point);
 
 impl Line {
 	/// Create a line using its end-point, starting in (0, 0)
-	pub fn from_origin(p: Vector) -> Line {
-		Line(Vector(0.0, 0.0), p)
+	pub fn from_origin(p: Point) -> Line {
+		Line(Point(0.0, 0.0), p)
 	}
 
 	/// Show us which quadrant this vector points to
@@ -31,8 +31,8 @@ impl Line {
 	/// about edge cases in `tile_net::Quadrant`.
 	///
 	/// ```
-	/// use tile_net::{Line, Vector, Quadrant};
-	/// assert_eq!(Line::from_origin(Vector(-3.0, 0.0)).quadrant(), Quadrant::Three);
+	/// use tile_net::{Line, Point, Quadrant};
+	/// assert_eq!(Line::from_origin(Point(-3.0, 0.0)).quadrant(), Quadrant::Three);
 	/// ```
 	pub fn quadrant(&self) -> Quadrant {
 		if (self.1).0 <= (self.0).0 && (self.1).1 > (self.0).1 {
@@ -117,8 +117,8 @@ impl Line {
 /// following example.
 ///
 /// ```
-/// use tile_net::{Line, Vector};
-/// let line = Line(Vector(0.8, 10.3), Vector(-30.0, 5.9));
+/// use tile_net::{Line, Point};
+/// let line = Line(Point(0.8, 10.3), Point(-30.0, 5.9));
 /// let tiles = line.supercover();
 /// for tile in tiles {
 /// 		println!("{:?}", tile);
@@ -179,18 +179,18 @@ impl Iterator for LineTiles {
 
 #[cfg(test)]
 mod tests {
-	use super::{Line, Vector};
+	use super::{Line, Point};
 	const UPPER_FLOAT: f32 = 16777216 as f32;
 	const LOWER_FLOAT: f32 = -16777216 as f32;
 
 	fn seq<I>(point: (f32, f32), iter: I) -> bool
 		where I: Iterator<Item = (i32, i32)>
 	{
-		Line::from_origin(Vector(point.0, point.1)).supercover().eq(iter)
+		Line::from_origin(Point(point.0, point.1)).supercover().eq(iter)
 	}
 
 	fn last(point: (i32, i32)) -> bool {
-		match Line::from_origin(Vector(point.0 as f32, point.1 as f32))
+		match Line::from_origin(Point(point.0 as f32, point.1 as f32))
 			.supercover()
 			.last()
 			.map(|x| point.0 == x.0 && point.1 == x.1) {
@@ -201,8 +201,7 @@ mod tests {
 
 	#[test]
 	fn supercover() {
-		assert!(seq((2.0, 2.0),
-		            vec![(0i32, 0i32), (0, 1), (1, 1), (1, 2), (2, 2)].iter().map(|x| *x)));
+		assert!(seq((2.0, 2.0), vec![(0i32, 0i32), (0, 1), (1, 1), (1, 2), (2, 2)].iter().map(|x| *x)));
 		assert!(seq((-2.0, 0.0), (0..3).map(|x| (-x, 0))));
 		assert!(seq((0.0, -0.1), (0..2).map(|x| (0, -x))));
 		assert!(seq((0.0, 0.1), (0..1).map(|_| (0, 0))));
@@ -211,12 +210,9 @@ mod tests {
 		assert!(seq((0.9999, 1.00001), (0..2).map(|x| (0, x))));
 		assert!(seq((10.0, 0.0), (0..11).map(|x| (x, 0))));
 		assert!(seq((0.0, 10.0), (0..11).map(|x| (0, x))));
-		assert!(seq((1.0, 20000000.0),
-		            (0..20000001).map(|x| (0, x)).chain((0..1).map(|_| (1, 20000000)))));
-		assert!(seq((-1.0, 20000000.0),
-		            (0..1).map(|_| (0, 0)).chain((0..20000001).map(|x| (-1, x)))));
-		assert!(seq((1.0, -20000000.0),
-		            (0..20000001).map(|x| (0, -x)).chain((0..1).map(|_| (1, -20000000)))));
+		assert!(seq((1.0, 20000000.0), (0..20000001).map(|x| (0, x)).chain((0..1).map(|_| (1, 20000000)))));
+		assert!(seq((-1.0, 20000000.0), (0..1).map(|_| (0, 0)).chain((0..20000001).map(|x| (-1, x)))));
+		assert!(seq((1.0, -20000000.0), (0..20000001).map(|x| (0, -x)).chain((0..1).map(|_| (1, -20000000)))));
 		assert!(last((1, 2)));
 		assert!(last((1, 16777216)));
 		assert!(last((1, 2)));

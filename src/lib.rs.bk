@@ -3,9 +3,8 @@
 //!
 
 mod defs;
-mod collable;
 
-pub use defs::{Rect, Line, Vector, Quadrant};
+pub use defs::{Rect, Line, Point, Quadrant};
 
 macro_rules! run {
 	($x:block until $y:expr) => {{
@@ -16,20 +15,17 @@ macro_rules! run {
 	}}
 }
 
-// impl TileBased for Character {
-// /// Get all the points of the object that need to be used in collision
-// fn points(&self) -> VectorSet;
-// /// Queue a movement: translate all points by vector
-// fn queue_move(&mut self, vector: Vector);
-// fn queued_move(&self) -> Vector;
-// /// Resolve the collision
-// fn resolve_move(&mut self, TileSet<T>) -> bool;
-// }
-//
+/*
+impl TileBased for Character {
+	fn lines(&mut self, ) -> Option<Line>;
+	fn queue_move(&mut self, );
+	fn exec_move(&mut self, tiles: Iterator<Item=Tile>);
+}
+*/
 /// Tile iterator returning tiles from the `tile_net::TileNet`.
 ///
 /// ```
-/// use tile_net::{Line, Vector, TileNet};
+/// use tile_net::{Line, Point, TileNet};
 ///
 /// let map: TileNet<usize> = TileNet::sample();
 /// let iter = (0..10).map(|x| (x, 3));
@@ -37,7 +33,7 @@ macro_rules! run {
 /// set.map(|x| println!("{:?}", x)).count();
 ///
 /// let map = TileNet::sample();
-/// let line = Line::from_origin(Vector(10.0, 5.0));
+/// let line = Line::from_origin(Point(10.0, 5.0));
 /// let cover = line.supercover();
 /// let set = map.collide_set(cover);
 /// for tile in set {
@@ -54,14 +50,16 @@ macro_rules! run {
 /// 'main: loop {
 /// 	handle_events(&mut world);
 /// 	// Physics for collidable units
-/// 		run!(
-/// 		{
-/// 			for coll in world.collidables_mut() {
-/// 				match map.collides(coll) {
-/// 					TileNet::NoCollision => coll.allow_move(),
-/// 					TileNet::Collision(collset) => coll.deny_move(&collset),
-/// 				}
-/// 			}
+///		run!(
+///		{
+///			for coll in world.collidables_mut() {
+///				match map.collides(coll) {
+///					TileNet::NoCollision => coll.allow_move(),
+///					TileNet::XCollision => coll.allow_move_y(),
+///					TileNet::YCollision => coll.allow_move_x(),
+///					TileNet::FullCollision => ,
+///				}
+///			}
 ///   } until TileBased::is_resolved(&coll));
 /// }
 /// ```
@@ -314,7 +312,7 @@ impl<T> TileNet<T>
 
 #[cfg(test)]
 mod tests {
-	use super::{Line, TileNet, Vector};
+	use super::{Line, TileNet, Point};
 
 	#[test]
 	fn get() {

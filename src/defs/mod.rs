@@ -1,9 +1,9 @@
 pub mod line;
-pub mod point;
+pub mod vector;
 pub mod rectangle;
 
 pub use self::line::Line;
-pub use self::point::Point;
+pub use self::vector::Vector;
 pub use self::rectangle::Rect;
 
 /// Descriptor denoting the quadrant
@@ -41,16 +41,16 @@ pub use self::rectangle::Rect;
 /// We can confirm these boundaries by using a `Line`:
 ///
 /// ```
-/// use tile_net::{Line, Point, Quadrant};
-/// let line = Line::from_origin(Point(1.0, 0.0));
+/// use tile_net::{Line, Vector, Quadrant};
+/// let line = Line::from_origin(Vector(1.0, 0.0));
 /// assert_eq!(line.quadrant(), Quadrant::One);
-/// let line = Line::from_origin(Point(0.0, 1.0));
+/// let line = Line::from_origin(Vector(0.0, 1.0));
 /// assert_eq!(line.quadrant(), Quadrant::Two);
-/// let line = Line::from_origin(Point(-1.0, 0.0));
+/// let line = Line::from_origin(Vector(-1.0, 0.0));
 /// assert_eq!(line.quadrant(), Quadrant::Three);
-/// let line = Line::from_origin(Point(0.0, -1.0));
+/// let line = Line::from_origin(Vector(0.0, -1.0));
 /// assert_eq!(line.quadrant(), Quadrant::Four);
-/// let line = Line::from_origin(Point(0.0, 0.0));
+/// let line = Line::from_origin(Vector(0.0, 0.0));
 /// assert_eq!(line.quadrant(), Quadrant::One);
 /// ```
 /// ![Plot](../../../res/quadrant.png)
