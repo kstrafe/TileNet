@@ -87,10 +87,9 @@ impl Line {
 			ey = (1.0 - start.1.fract()) * dy;
 		}
 
-		const LAST_TILE_FORCED: usize = 1;
 		let len =
-			stop.0.floor().abs() as usize - start.0.floor().abs() as usize
-			+ stop.1.floor().abs() as usize - start.1.floor().abs() as usize;
+			(stop.0.floor() as i64 - start.0.floor() as i64).abs() as usize
+			+ (stop.1.floor() as i64 - start.1.floor() as i64).abs() as usize;
 
 		LineTiles {
 			it: 0,

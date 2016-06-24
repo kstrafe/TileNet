@@ -75,5 +75,7 @@ mod tests {
 		Line::from_origin(Vector(0.5, 0.0)).supercover().inspect(|x| println!("{:?}", x)).count();
 		println!("HELLO");
 		Line(Vector(0.5, 0.0), Vector(1.0, 0.0)).supercover().inspect(|x| println!("{:?}", x)).count();
+		Line(Vector(-5.0, 0.0), Vector(-4.0, 0.0)).supercover().inspect(|x| println!("{:?}", x)).count();
+		Line(Vector(-5.0, 0.0), Vector(4.0, 0.0)).supercover().inspect(|x| println!("{:?}", x)).count();
 	}
 }
