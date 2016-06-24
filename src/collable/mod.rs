@@ -1,4 +1,4 @@
-use super::{LineTiles, Line, Vector, TileSet};
+pub use super::{LineTiles, Line, Vector, TileSet};
 use std::fmt;
 use std::slice;
 
@@ -38,16 +38,42 @@ pub trait Collable {
 }
 
 /// Represents the tiles touched by various lines
-struct LinesTiles<'a> {
+struct LinesTiles {
 	// NOTE: Lines are assumed to be of equal length, so it's probably true that there are equal
 	// amounts of tiles in each LineTiles iterator
 	lines: Vec<LineTiles>,
-	line_iter: slice::Iter<'a, LineTiles>,
+	index: usize,
 }
 
-impl<'a> Iterator for LinesTiles<'a> {
+impl Iterator for LinesTiles {
 	type Item = (i32, i32);
 	fn next(&mut self) -> Option<Self::Item> {
-		None
+		let mut clean = true;
+		loop {
+			if self.index < self.lines.len() {
+				if let Some(line) = self.lines.get_mut(self.index) {
+					self.index += 1;
+					return line.next();
+				}
+				self.index += 1;
+			} else {
+				if clean {
+					return None;
+				} else {
+					self.index = 0;
+				}
+			}
+		}
+	}
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+	#[test]
+	fn test() {
+		Line::from_origin(Vector(0.5, 0.0)).supercover().inspect(|x| println!("{:?}", x)).count();
+		println!("HELLO");
+		Line(Vector(0.5, 0.0), Vector(1.0, 0.0)).supercover().inspect(|x| println!("{:?}", x)).count();
 	}
 }

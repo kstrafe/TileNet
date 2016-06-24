@@ -1,8 +1,5 @@
 pub use super::{Vector, Quadrant};
 
-const MAX: f32 = 16777216 as f32;
-const MIN: f32 = -16777216 as f32;
-
 /// Describe a line by its start and end `Vector` respectively
 ///
 /// A line can be constructed and used with tuples
@@ -90,7 +87,10 @@ impl Line {
 			ey = (1.0 - start.1.fract()) * dy;
 		}
 
-		let len = vx.floor().abs() as usize + vy.floor().abs() as usize;
+		const LAST_TILE_FORCED: usize = 1;
+		let len =
+			stop.0.floor().abs() as usize - start.0.floor().abs() as usize
+			+ stop.1.floor().abs() as usize - start.1.floor().abs() as usize;
 
 		LineTiles {
 			it: 0,
@@ -170,7 +170,8 @@ impl Iterator for LineTiles {
 			old
 		} else if self.it == self.len {
 			self.it += 1;
-			Some((self.dest_x, self.dest_y))
+			let old = Some((self.dest_x, self.dest_y));
+			old
 		} else {
 			None
 		}
