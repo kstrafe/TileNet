@@ -2,7 +2,7 @@ pub mod line;
 pub mod vector;
 pub mod rectangle;
 
-pub use self::line::Line;
+pub use self::line::{Line, LineTiles};
 pub use self::vector::Vector;
 pub use self::rectangle::Rect;
 

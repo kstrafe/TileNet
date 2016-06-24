@@ -1,5 +1,6 @@
-use super::{Line, Vector, TileSet};
+use super::{LineTiles, Line, Vector, TileSet};
 use std::fmt;
+use std::slice;
 
 /// Trait for dynamic objects so they can easily check collisions with the `TileMap`
 pub trait Collable {
@@ -22,11 +23,31 @@ pub trait Collable {
 	/// If you aren't satisfied, you can change the move vector and return false, this means
 	/// that we'll try again. Another set of tiles may then be given.
 	/// If you're satisfied, return true and adjust your `Collable`'s position accordingly.
+	///
+	/// IMPORTANT: You should add the move from queued_move to your point set. The ray tracer
+	/// also adds to find the next points. This will prevent you from getting stuck in a wall.
 	fn resolve_move<'a, T, I>(&mut self, set: TileSet<'a, T, I>) -> bool
 		where T: 'a + Clone + fmt::Debug,
 		      I: Iterator<Item = (i32, i32)>;
 
-	fn lines(&self) -> Line {
-		Line(Vector(0.0, 0.0), Vector(1.0, 2.0))
+	/// Gives us a list of points, sorted by proximity on the line.
+	///
+	/// The sortedness of the returned iterator means you can base your decision on the
+	/// first element(s), as they represent the first collision.
+	fn tiles(&self) {}
+}
+
+/// Represents the tiles touched by various lines
+struct LinesTiles<'a> {
+	// NOTE: Lines are assumed to be of equal length, so it's probably true that there are equal
+	// amounts of tiles in each LineTiles iterator
+	lines: Vec<LineTiles>,
+	line_iter: slice::Iter<'a, LineTiles>,
+}
+
+impl<'a> Iterator for LinesTiles<'a> {
+	type Item = (i32, i32);
+	fn next(&mut self) -> Option<Self::Item> {
+		None
 	}
 }

@@ -24,7 +24,7 @@ mod collable;
 mod defs;
 mod tiles;
 
-pub use defs::{Rect, Line, Vector, Quadrant};
+pub use defs::{LineTiles, Rect, Line, Vector, Quadrant};
 pub use collable::Collable;
 pub use tiles::{TileNet, TileView, TileSet};
 
