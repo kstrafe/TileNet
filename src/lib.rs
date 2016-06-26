@@ -30,7 +30,7 @@ pub use tiles::{TileNet, TileView, TileSet};
 
 #[cfg(test)]
 mod tests {
-	use super::{Line, TileNet, Vector};
+	use super::TileNet;
 
 	#[test]
 	fn get() {

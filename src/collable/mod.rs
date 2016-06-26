@@ -1,23 +1,22 @@
 pub use super::{LineTiles, Line, Vector, TileSet};
 use std::fmt;
-use std::slice;
 
 /// Trait for dynamic objects so they can easily check collisions with the `TileMap`
 pub trait Collable {
 	/// Returns the set of points associated with this object. These points are used to
 	/// draw lines to their respective next points. For a rectangle, the four courners
 	/// may be points. For a circle, a whole bunch of points may be defined.
-	fn points(&self);
+	fn points(&self) -> Vector;
 
 	/// Instructs the object to store (queue) a change in position. This may be useful when
 	/// you have an event loop and you'd like to move a character. You call this function.
 	/// An AI handler may also queue a move. It's up to you if you want to add moves
 	/// together or store them in any other way.
-	fn queue_move(&mut self, vector: Vector);
+	fn queue(&mut self, vector: Vector);
 
 	/// Get the previously queued move. Should reasonably return what was given in `queue_move`,
 	/// but you can do whatever makes sense in your application.
-	fn queued_move(&self) -> Vector;
+	fn queued(&self) -> Vector;
 
 	/// Resolve the movement: you get a set of tiles and you decide what to do with them.
 	/// If you aren't satisfied, you can change the move vector and return false, this means
@@ -26,7 +25,7 @@ pub trait Collable {
 	///
 	/// IMPORTANT: You should add the move from queued_move to your point set. The ray tracer
 	/// also adds to find the next points. This will prevent you from getting stuck in a wall.
-	fn resolve_move<'a, T, I>(&mut self, set: TileSet<'a, T, I>) -> bool
+	fn resolve<'a, T, I>(&mut self, set: TileSet<'a, T, I>) -> bool
 		where T: 'a + Clone + fmt::Debug,
 		      I: Iterator<Item = (i32, i32)>;
 
@@ -48,7 +47,7 @@ struct LinesTiles {
 impl Iterator for LinesTiles {
 	type Item = (i32, i32);
 	fn next(&mut self) -> Option<Self::Item> {
-		let mut clean = true;
+		let clean = true;
 		loop {
 			if self.index < self.lines.len() {
 				if let Some(line) = self.lines.get_mut(self.index) {
@@ -77,5 +76,6 @@ mod tests {
 		Line(Vector(0.5, 0.0), Vector(1.0, 0.0)).supercover().inspect(|x| println!("{:?}", x)).count();
 		Line(Vector(-5.0, 0.0), Vector(-4.0, 0.0)).supercover().inspect(|x| println!("{:?}", x)).count();
 		Line(Vector(-5.0, 0.0), Vector(4.0, 0.0)).supercover().inspect(|x| println!("{:?}", x)).count();
+		Line(Vector(5.0, -3.0), Vector(3.99, 4.0)).supercover().inspect(|x| println!("{:?}", x)).count();
 	}
 }

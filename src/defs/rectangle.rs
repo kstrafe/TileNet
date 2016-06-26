@@ -29,7 +29,7 @@ pub struct RectTiles;
 
 #[cfg(test)]
 mod tests {
-	use super::{Vector, Rect};
+	use super::Rect;
 
 	#[test]
 	fn test() {

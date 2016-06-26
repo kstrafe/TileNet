@@ -144,7 +144,7 @@ impl<T> TileNet<T> {
 		}
 	}
 
-	pub fn collision_between<'a, I>(&'a self, rect_a: &Rect, rect_b: &Rect) -> TileSet<'a, T, I>
+	pub fn collision_between<'a, I>(&'a self, _: &Rect, _: &Rect) -> TileSet<'a, T, I>
 		where I: Iterator<Item = (i32, i32)>
 	{
 		unimplemented!();
