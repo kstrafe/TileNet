@@ -87,9 +87,8 @@ impl Line {
 			ey = (1.0 - start.1.fract()) * dy;
 		}
 
-		let len =
-			(stop.0.floor() as i64 - start.0.floor() as i64).abs() as usize
-			+ (stop.1.floor() as i64 - start.1.floor() as i64).abs() as usize;
+		let len = (stop.0.floor() as i64 - start.0.floor() as i64).abs() as usize +
+		          (stop.1.floor() as i64 - start.1.floor() as i64).abs() as usize;
 
 		LineTiles {
 			it: 0,

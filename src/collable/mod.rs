@@ -6,15 +6,15 @@ pub trait Collable {
 	/// Returns the set of points associated with this object. These points are used to
 	/// draw lines to their respective next points. For a rectangle, the four courners
 	/// may be points. For a circle, a whole bunch of points may be defined.
-	fn points(&self) -> Vector;
+	fn points(&self) -> Vec<(f32, f32)>;
 
 	/// Instructs the object to store (queue) a change in position. This may be useful when
 	/// you have an event loop and you'd like to move a character. You call this function.
 	/// An AI handler may also queue a move. It's up to you if you want to add moves
 	/// together or store them in any other way.
-	fn queue(&mut self, vector: Vector);
+	fn enqueue(&mut self, vector: Vector);
 
-	/// Get the previously queued move. Should reasonably return what was given in `queue_move`,
+	/// Get the previously queued move. Should reasonably return what was given in `enqueue`,
 	/// but you can do whatever makes sense in your application.
 	fn queued(&self) -> Vector;
 
@@ -33,7 +33,9 @@ pub trait Collable {
 	///
 	/// The sortedness of the returned iterator means you can base your decision on the
 	/// first element(s), as they represent the first collision.
-	fn tiles(&self) {}
+	fn tiles(&self) {
+
+	}
 }
 
 /// Represents the tiles touched by various lines
@@ -52,7 +54,12 @@ impl Iterator for LinesTiles {
 			if self.index < self.lines.len() {
 				if let Some(line) = self.lines.get_mut(self.index) {
 					self.index += 1;
-					return line.next();
+					let maybe = line.next();
+					if let Some(_) = maybe {
+						return maybe;
+					} else {
+
+					}
 				}
 				self.index += 1;
 			} else {
@@ -73,9 +80,21 @@ mod tests {
 	fn test() {
 		Line::from_origin(Vector(0.5, 0.0)).supercover().inspect(|x| println!("{:?}", x)).count();
 		println!("HELLO");
-		Line(Vector(0.5, 0.0), Vector(1.0, 0.0)).supercover().inspect(|x| println!("{:?}", x)).count();
-		Line(Vector(-5.0, 0.0), Vector(-4.0, 0.0)).supercover().inspect(|x| println!("{:?}", x)).count();
-		Line(Vector(-5.0, 0.0), Vector(4.0, 0.0)).supercover().inspect(|x| println!("{:?}", x)).count();
-		Line(Vector(5.0, -3.0), Vector(3.99, 4.0)).supercover().inspect(|x| println!("{:?}", x)).count();
+		Line(Vector(0.5, 0.0), Vector(1.0, 0.0))
+			.supercover()
+			.inspect(|x| println!("{:?}", x))
+			.count();
+		Line(Vector(-5.0, 0.0), Vector(-4.0, 0.0))
+			.supercover()
+			.inspect(|x| println!("{:?}", x))
+			.count();
+		Line(Vector(-5.0, 0.0), Vector(4.0, 0.0))
+			.supercover()
+			.inspect(|x| println!("{:?}", x))
+			.count();
+		Line(Vector(5.0, -3.0), Vector(3.99, 4.0))
+			.supercover()
+			.inspect(|x| println!("{:?}", x))
+			.count();
 	}
 }
