@@ -1,12 +1,39 @@
 pub use super::{LineTiles, Line, Vector, TileSet};
 use std::fmt;
 
+pub use interleave::{IterList, MultiIter};
+
+struct Points<'a> {
+	index : usize,
+	offset: Vector,
+	points: &'a Vec<(f32, f32)>,
+}
+
+impl<'a> Points<'a> {
+	fn new(offset: Vector, points: &'a Vec<(f32, f32)>) -> Points {
+		Points {
+			index: 0,
+			offset: offset,
+			points: points,
+		}
+	}
+}
+
+impl<'a> Iterator for Points<'a> {
+	type Item = (f32, f32);
+	fn next(&mut self) -> Option<Self::Item> {
+		let ret = self.points.get(self.index).map(|x| *x);
+		self.index += 1;
+		ret
+	}
+}
+
 /// Trait for dynamic objects so they can easily check collisions with the `TileMap`
 pub trait Collable {
 	/// Returns the set of points associated with this object. These points are used to
 	/// draw lines to their respective next points. For a rectangle, the four courners
 	/// may be points. For a circle, a whole bunch of points may be defined.
-	fn points(&self) -> Vec<(f32, f32)>;
+	fn points<'a>(&'a self) -> Points<'a>;
 
 	/// Instructs the object to store (queue) a change in position. This may be useful when
 	/// you have an event loop and you'd like to move a character. You call this function.
@@ -26,14 +53,25 @@ pub trait Collable {
 	/// IMPORTANT: You should add the move from queued_move to your point set. The ray tracer
 	/// also adds to find the next points. This will prevent you from getting stuck in a wall.
 	fn resolve<'a, T, I>(&mut self, set: TileSet<'a, T, I>) -> bool
-		where T: 'a + Clone + fmt::Debug,
+		where T: 'a,
 		      I: Iterator<Item = (i32, i32)>;
 
 	/// Gives us a list of points, sorted by proximity on the line.
 	///
 	/// The sortedness of the returned iterator means you can base your decision on the
 	/// first element(s), as they represent the first collision.
-	fn tiles(&self) {}
+	fn tiles(&self) -> MultiIter<(i32, i32)> {
+		let points = self.points();
+		let queued = self.queued();
+		let mut multi = interleave!((i32, i32));
+		for point in points {
+			let current = Vector::from_tuple(point);
+			let next = current + queued;
+			let line = Line(current, next);
+			multi.push(Box::new(line.supercover()));
+		}
+		multi
+	}
 }
 
 /// Represents the tiles touched by various lines
@@ -72,25 +110,61 @@ impl Iterator for LinesTiles {
 #[cfg(test)]
 mod tests {
 	use super::*;
+	use super::Points;
+
 	#[test]
 	fn test() {
-		Line::from_origin(Vector(0.5, 0.0)).supercover().inspect(|x| println!("{:?}", x)).count();
-		println!("HELLO");
-		Line(Vector(0.5, 0.0), Vector(1.0, 0.0))
-			.supercover()
-			.inspect(|x| println!("{:?}", x))
-			.count();
-		Line(Vector(-5.0, 0.0), Vector(-4.0, 0.0))
-			.supercover()
-			.inspect(|x| println!("{:?}", x))
-			.count();
-		Line(Vector(-5.0, 0.0), Vector(4.0, 0.0))
-			.supercover()
-			.inspect(|x| println!("{:?}", x))
-			.count();
-		Line(Vector(5.0, -3.0), Vector(3.99, 4.0))
-			.supercover()
-			.inspect(|x| println!("{:?}", x))
-			.count();
+		struct Character {
+			pts: Vec<(f32, f32)>,
+		}
+
+		impl Character {
+			fn new() -> Character {
+				Character {
+					pts: vec![(0.0, 0.0), (1.0, 1.0), (0.0, 1.0), (1.0, 0.0)],
+				}
+			}
+		}
+
+		impl Collable for Character {
+			fn points<'a>(&'a self) -> Points<'a> {
+				let off = Vector(0.0, 0.0);
+				Points::new(off, &self.pts)
+			}
+
+			fn enqueue(&mut self, vector: Vector) { }
+
+			fn queued(&self) -> Vector {
+				Vector(2.0, 2.0)
+			}
+
+			fn resolve<'a, T, I>(&mut self, set: TileSet<'a, T, I>) -> bool
+				where T: 'a,
+				      I: Iterator<Item = (i32, i32)>
+			{
+				unimplemented!();
+			}
+		}
+
+
+		// Line::from_origin(Vector(0.5, 0.0)).supercover().inspect(|x| println!("{:?}", x)).count();
+		// println!("HELLO");
+		// Line(Vector(0.5, 0.0), Vector(1.0, 0.0))
+		// .supercover()
+		// .inspect(|x| println!("{:?}", x))
+		// .count();
+		// Line(Vector(-5.0, 0.0), Vector(-4.0, 0.0))
+		// .supercover()
+		// .inspect(|x| println!("{:?}", x))
+		// .count();
+		// Line(Vector(-5.0, 0.0), Vector(4.0, 0.0))
+		// .supercover()
+		// .inspect(|x| println!("{:?}", x))
+		// .count();
+		// Line(Vector(5.0, -3.0), Vector(3.99, 4.0))
+		// .supercover()
+		// .inspect(|x| println!("{:?}", x))
+		// .count();
+		//
 	}
 }
