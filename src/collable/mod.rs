@@ -62,12 +62,10 @@ impl Iterator for LinesTiles {
 					}
 				}
 				self.index += 1;
-			} else {
-				if clean {
+			} else if clean {
 					return None;
-				} else {
-					self.index = 0;
-				}
+			} else {
+				self.index = 0;
 			}
 		}
 	}

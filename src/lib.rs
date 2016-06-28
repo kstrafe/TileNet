@@ -1,6 +1,9 @@
+#![cfg_attr(feature = "dev", allow(unstable_features))]
+#![cfg_attr(feature = "dev", feature(plugin))]
+#![cfg_attr(feature = "dev", plugin(clippy))]
 #![allow(dead_code)]
-//! TileNet holds integer aligned tiles for broad phase continuous collision detection.
-//! The purpose of TileNet is to have a solid, tile-based, continuous, simple collision
+//! `TileNet` holds integer aligned tiles for broad phase continuous collision detection.
+//! The purpose of `TileNet` is to have a solid, tile-based, continuous, simple collision
 //! library for aspiring game programmers.
 //!
 //! # How it works #
@@ -95,7 +98,7 @@ mod tests {
 
 	#[test]
 	fn from_iter_and_view_box() {
-		let map: TileNet<usize> = TileNet::from_iter(10, (1..101).map(|x| Some(x)));
+		let map: TileNet<usize> = TileNet::from_iter(10, (1..101).map(Some));
 		let mut view = map.view_box((3, 8, 1, 4));
 		(14usize..19)
 			.chain((24..29))
@@ -106,7 +109,7 @@ mod tests {
 
 	#[test]
 	fn from_iter_with_remainder() {
-		let map: TileNet<usize> = TileNet::from_iter(10, (1..25).map(|x| Some(x)));
+		let map: TileNet<usize> = TileNet::from_iter(10, (1..25).map(Some));
 		let mut view = map.view_box((0, 10, 0, 3));
 		for x in (1..31).map(|x| if x >= 25 {
 			None
@@ -116,7 +119,7 @@ mod tests {
 			assert_eq!(view.next().unwrap(), &x);
 		}
 
-		let map: TileNet<usize> = TileNet::from_iter(10, (1..31).map(|x| Some(x)));
+		let map: TileNet<usize> = TileNet::from_iter(10, (1..31).map(Some));
 		let mut view = map.view_box((0, 10, 0, 3));
 		for x in 1..31 {
 			assert_eq!(view.next().unwrap(), &Some(x));

@@ -135,7 +135,7 @@ impl<T> TileNet<T> {
 		list.any(|p| self.is_occupied(p))
 	}
 
-	pub fn collide_set<'a, I>(&'a self, list: I) -> TileSet<'a, T, I>
+	pub fn collide_set<I>(&self, list: I) -> TileSet<T, I>
 		where I: Iterator<Item = (i32, i32)>
 	{
 		TileSet {
