@@ -33,9 +33,7 @@ pub trait Collable {
 	///
 	/// The sortedness of the returned iterator means you can base your decision on the
 	/// first element(s), as they represent the first collision.
-	fn tiles(&self) {
-
-	}
+	fn tiles(&self) {}
 }
 
 /// Represents the tiles touched by various lines
@@ -63,7 +61,7 @@ impl Iterator for LinesTiles {
 				}
 				self.index += 1;
 			} else if clean {
-					return None;
+				return None;
 			} else {
 				self.index = 0;
 			}

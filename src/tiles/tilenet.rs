@@ -1,3 +1,5 @@
+extern crate interleave;
+
 use std::fmt;
 use super::{TileView, TileSet, Rect};
 

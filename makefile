@@ -1,6 +1,6 @@
 all:
 	cargo doc
-	cargo build
+	cargo build --features dev
 	bash -c 'if ! cargo test -- --nocapture > /tmp/$$$$cargout; then cat /tmp/$$$$cargout; rm /tmp/$$$$cargout; fi'
 
 fmt:

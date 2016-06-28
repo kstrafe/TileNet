@@ -5,6 +5,7 @@ authors = ["Bourgond Aries <macocio@gmail.com>"]
 
 [dependencies]
 clippy = {version = "0.0.77", optional = true}
+interleave = "0.2.3"
 
 [features]
 default = []
