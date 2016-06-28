@@ -23,6 +23,9 @@
 //! Work in progress...
 //! ```
 
+#[macro_use]
+extern crate interleave;
+
 mod collable;
 mod defs;
 mod tiles;
