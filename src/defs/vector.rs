@@ -14,6 +14,12 @@ use std::ops::{Add, Sub};
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Vector(pub f32, pub f32);
 
+impl Vector {
+	pub fn from_tuple(tuple: (f32, f32)) -> Vector {
+		Vector(tuple.0, tuple.1)
+	}
+}
+
 impl Add for Vector {
 	type Output = Vector;
 
