@@ -31,7 +31,7 @@ mod defs;
 mod tiles;
 
 pub use defs::{LineTiles, Rect, Line, Vector, Quadrant};
-pub use collable::Collable;
+pub use collable::{Collable, Points};
 pub use tiles::{TileNet, TileView, TileSet};
 
 #[cfg(test)]

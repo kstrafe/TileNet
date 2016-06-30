@@ -4,7 +4,7 @@ pub use interleave::{IterList, MultiIter};
 
 
 pub struct Points<'a> {
-	index : usize,
+	index: usize,
 	offset: Vector,
 	points: &'a [(f32, f32)],
 }
@@ -123,9 +123,7 @@ mod tests {
 
 		impl Character {
 			fn new() -> Character {
-				Character {
-					pts: vec![(0.0, 0.0), (1.0, 1.0), (0.0, 1.0), (1.0, 0.0)],
-				}
+				Character { pts: vec![(0.0, 0.0), (1.0, 1.0), (0.0, 1.0), (1.0, 0.0)] }
 			}
 		}
 
@@ -135,7 +133,7 @@ mod tests {
 				Points::new(off, &self.pts)
 			}
 
-			fn enqueue(&mut self, _: Vector) { }
+			fn enqueue(&mut self, _: Vector) {}
 
 			fn queued(&self) -> Vector {
 				Vector(0.0, 0.0)
@@ -154,25 +152,5 @@ mod tests {
 			println!("{:?}", i);
 		}
 
-
-		// Line::from_origin(Vector(0.5, 0.0)).supercover().inspect(|x| println!("{:?}", x)).count();
-		// println!("HELLO");
-		// Line(Vector(0.5, 0.0), Vector(1.0, 0.0))
-		// .supercover()
-		// .inspect(|x| println!("{:?}", x))
-		// .count();
-		// Line(Vector(-5.0, 0.0), Vector(-4.0, 0.0))
-		// .supercover()
-		// .inspect(|x| println!("{:?}", x))
-		// .count();
-		// Line(Vector(-5.0, 0.0), Vector(4.0, 0.0))
-		// .supercover()
-		// .inspect(|x| println!("{:?}", x))
-		// .count();
-		// Line(Vector(5.0, -3.0), Vector(3.99, 4.0))
-		// .supercover()
-		// .inspect(|x| println!("{:?}", x))
-		// .count();
-		//
 	}
 }
