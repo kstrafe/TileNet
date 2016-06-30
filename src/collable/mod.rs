@@ -1,16 +1,16 @@
 pub use super::{LineTiles, Line, Vector, TileSet};
-use std::fmt;
 
 pub use interleave::{IterList, MultiIter};
 
-struct Points<'a> {
+
+pub struct Points<'a> {
 	index : usize,
 	offset: Vector,
-	points: &'a Vec<(f32, f32)>,
+	points: &'a [(f32, f32)],
 }
 
 impl<'a> Points<'a> {
-	fn new(offset: Vector, points: &'a Vec<(f32, f32)>) -> Points {
+	fn new(offset: Vector, points: &'a [(f32, f32)]) -> Points {
 		Points {
 			index: 0,
 			offset: offset,
@@ -22,7 +22,11 @@ impl<'a> Points<'a> {
 impl<'a> Iterator for Points<'a> {
 	type Item = (f32, f32);
 	fn next(&mut self) -> Option<Self::Item> {
-		let ret = self.points.get(self.index).map(|x| *x);
+		let ret = self.points
+			.get(self.index)
+			.cloned()
+			.map(|x| Vector::from_tuple(x) + self.offset)
+			.map(|x| (x.0, x.1));
 		self.index += 1;
 		ret
 	}
@@ -33,7 +37,7 @@ pub trait Collable {
 	/// Returns the set of points associated with this object. These points are used to
 	/// draw lines to their respective next points. For a rectangle, the four courners
 	/// may be points. For a circle, a whole bunch of points may be defined.
-	fn points<'a>(&'a self) -> Points<'a>;
+	fn points(&self) -> Points;
 
 	/// Instructs the object to store (queue) a change in position. This may be useful when
 	/// you have an event loop and you'd like to move a character. You call this function.
@@ -110,7 +114,6 @@ impl Iterator for LinesTiles {
 #[cfg(test)]
 mod tests {
 	use super::*;
-	use super::Points;
 
 	#[test]
 	fn test() {
@@ -128,22 +131,27 @@ mod tests {
 
 		impl Collable for Character {
 			fn points<'a>(&'a self) -> Points<'a> {
-				let off = Vector(0.0, 0.0);
+				let off = Vector(-10.0, 5.0);
 				Points::new(off, &self.pts)
 			}
 
-			fn enqueue(&mut self, vector: Vector) { }
+			fn enqueue(&mut self, _: Vector) { }
 
 			fn queued(&self) -> Vector {
-				Vector(2.0, 2.0)
+				Vector(0.0, 0.0)
 			}
 
-			fn resolve<'a, T, I>(&mut self, set: TileSet<'a, T, I>) -> bool
+			fn resolve<'a, T, I>(&mut self, _: TileSet<'a, T, I>) -> bool
 				where T: 'a,
 				      I: Iterator<Item = (i32, i32)>
 			{
-				unimplemented!();
+				false
 			}
+		}
+
+		let ch = Character::new();
+		for i in ch.tiles() {
+			println!("{:?}", i);
 		}
 
 
