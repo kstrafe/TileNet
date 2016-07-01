@@ -107,8 +107,12 @@ pub struct TileView<'a, T>
 	current: (usize, usize),
 }
 
-impl<'a, T> TileView<'a, T> where T: 'a {
-	fn new(tilenet: &'a TileNet<T>, mut rectangle: (usize, usize, usize, usize)) -> TileView<'a, T> {
+impl<'a, T> TileView<'a, T>
+    where T: 'a
+{
+	fn new(tilenet: &'a TileNet<T>,
+	       mut rectangle: (usize, usize, usize, usize))
+	       -> TileView<'a, T> {
 		rectangle.1 = min(rectangle.1, tilenet.get_size().1);
 		rectangle.3 = min(rectangle.3, tilenet.get_size().0);
 		TileView {

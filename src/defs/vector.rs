@@ -20,7 +20,7 @@ impl Vector {
 	}
 
 	pub fn norm2sq(&self) -> f32 {
-		self.0*self.0 + self.1*self.1
+		self.0 * self.0 + self.1 * self.1
 	}
 
 	pub fn scale(&mut self, factor: f32) {

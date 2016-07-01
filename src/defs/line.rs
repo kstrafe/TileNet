@@ -1,4 +1,4 @@
-pub use super::{Vector, Quadrant};
+pub use super::Vector;
 
 /// Describe a line by its start and end `Vector` respectively
 ///
@@ -19,28 +19,6 @@ impl Line {
 	/// Create a line using its end-point, starting in (0, 0)
 	pub fn from_origin(p: Vector) -> Line {
 		Line(Vector(0.0, 0.0), p)
-	}
-
-	/// Show us which quadrant this vector points to
-	///
-	/// The quadrant is the second (end) point relative
-	/// to the beginning point. See more in-depth rules
-	/// about edge cases in `tile_net::Quadrant`.
-	///
-	/// ```
-	/// use tile_net::{Line, Vector, Quadrant};
-	/// assert_eq!(Line::from_origin(Vector(-3.0, 0.0)).quadrant(), Quadrant::Three);
-	/// ```
-	pub fn quadrant(&self) -> Quadrant {
-		if (self.1).0 <= (self.0).0 && (self.1).1 > (self.0).1 {
-			Quadrant::Two
-		} else if (self.1).0 < (self.0).0 && (self.1).1 <= (self.0).1 {
-			Quadrant::Three
-		} else if (self.1).0 >= (self.0).0 && (self.1).1 < (self.0).1 {
-			Quadrant::Four
-		} else {
-			Quadrant::One
-		}
 	}
 
 	/// Create a supercover line iterator
