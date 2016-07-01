@@ -106,7 +106,7 @@ mod tests {
 		(14usize..19)
 			.chain((24..29))
 			.chain((34..39))
-			.map(|x| assert_eq!(view.next().unwrap(), &Some(x)))
+			.map(|x| assert_eq!(view.next().unwrap().0, &Some(x)))
 			.count();
 	}
 
@@ -119,13 +119,13 @@ mod tests {
 		} else {
 			Some(x)
 		}) {
-			assert_eq!(view.next().unwrap(), &x);
+			assert_eq!(view.next().unwrap().0, &x);
 		}
 
 		let map: TileNet<usize> = TileNet::from_iter(10, (1..31).map(Some));
 		let mut view = map.view_box((0, 10, 0, 3));
 		for x in 1..31 {
-			assert_eq!(view.next().unwrap(), &Some(x));
+			assert_eq!(view.next().unwrap().0, &Some(x));
 		}
 	}
 

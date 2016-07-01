@@ -126,12 +126,12 @@ impl<'a, T> TileView<'a, T> where T: 'a {
 impl<'a, T> Iterator for TileView<'a, T>
     where T: 'a
 {
-	type Item = &'a Option<T>;
+	type Item = (&'a Option<T>, usize, usize);
 	fn next(&mut self) -> Option<Self::Item> {
 		if self.current.1 >= self.rectangle.3 {
 			return None;
 		}
-		let tile = self.tilenet.get(self.current);
+		let tile = self.tilenet.get(self.current).map(|x| (x, self.current.0, self.current.1));
 
 		self.current.0 += 1;
 		if self.current.0 >= self.rectangle.1 {
