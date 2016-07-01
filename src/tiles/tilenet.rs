@@ -101,11 +101,7 @@ impl<T> TileNet<T> {
 	}
 
 	pub fn view_box(&self, rectangle: (usize, usize, usize, usize)) -> TileView<T> {
-		TileView {
-			tilenet: self,
-			rectangle: rectangle,
-			current: (rectangle.0, rectangle.2),
-		}
+		TileView::new(self, rectangle)
 	}
 
 	pub fn get(&self, p: (usize, usize)) -> Option<&Option<T>> {

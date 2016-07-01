@@ -1,4 +1,5 @@
 use std::fmt;
+use std::cmp::min;
 pub use super::Rect;
 pub use self::tilenet::TileNet;
 
@@ -105,6 +106,21 @@ pub struct TileView<'a, T>
 	tilenet: &'a TileNet<T>,
 	rectangle: (usize, usize, usize, usize),
 	current: (usize, usize),
+}
+
+impl<'a, T> TileView<'a, T> where T: 'a {
+	fn new(tilenet: &'a TileNet<T>, mut rectangle: (usize, usize, usize, usize)) -> TileView<'a, T> {
+		rectangle.1 = min(rectangle.1, tilenet.get_size().1);
+		println!("Right bound: {}", rectangle.1);
+		rectangle.3 = min(rectangle.3, tilenet.get_size().0);
+		println!("Bottom bound: {}", rectangle.3);
+		println!("Tilenet size: {:?}", tilenet.get_size());
+		TileView {
+			tilenet: tilenet,
+			rectangle: rectangle,
+			current: (rectangle.0, rectangle.2),
+		}
+	}
 }
 
 impl<'a, T> Iterator for TileView<'a, T>
