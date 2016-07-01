@@ -18,6 +18,10 @@ impl Vector {
 	pub fn from_tuple(tuple: (f32, f32)) -> Vector {
 		Vector(tuple.0, tuple.1)
 	}
+
+	pub fn norm2sq(&self) -> f32 {
+		self.0*self.0 + self.1*self.1
+	}
 }
 
 impl Add for Vector {
