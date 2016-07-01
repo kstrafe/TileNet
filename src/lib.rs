@@ -22,7 +22,7 @@
 //! Work in progress...
 //! ```
 
-#[macro_use]
+#[macro_use(interleave)]
 extern crate interleave;
 
 mod collable;

@@ -11,9 +11,10 @@ use super::{TileView, TileSet};
 ///
 /// ```
 /// use tile_net::TileNet;
-/// #[derive(Clone)]
+/// #[derive(Clone, Debug)]
 /// struct Example(i32);
 /// let my_net = TileNet::<Example>::new((10, 10));
+/// println!("{:?}", my_net);
 /// ```
 #[derive(Clone)]
 pub struct TileNet<T> {
