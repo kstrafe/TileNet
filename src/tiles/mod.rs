@@ -111,10 +111,7 @@ pub struct TileView<'a, T>
 impl<'a, T> TileView<'a, T> where T: 'a {
 	fn new(tilenet: &'a TileNet<T>, mut rectangle: (usize, usize, usize, usize)) -> TileView<'a, T> {
 		rectangle.1 = min(rectangle.1, tilenet.get_size().1);
-		println!("Right bound: {}", rectangle.1);
 		rectangle.3 = min(rectangle.3, tilenet.get_size().0);
-		println!("Bottom bound: {}", rectangle.3);
-		println!("Tilenet size: {:?}", tilenet.get_size());
 		TileView {
 			tilenet: tilenet,
 			rectangle: rectangle,
