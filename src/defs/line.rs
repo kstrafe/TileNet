@@ -97,7 +97,7 @@ impl Line {
 /// let line = Line(Vector(0.8, 10.3), Vector(-30.0, 5.9));
 /// let tiles = line.supercover();
 /// for tile in tiles {
-/// 		println!("{:?}", tile);
+/// 	println!("{:?}", tile);
 /// }
 /// ```
 #[derive(Clone)]
@@ -156,8 +156,6 @@ impl Iterator for LineTiles {
 #[cfg(test)]
 mod tests {
 	use super::{Line, Vector};
-	const UPPER_FLOAT: f32 = 16777216 as f32;
-	const LOWER_FLOAT: f32 = -16777216 as f32;
 
 	fn seq<I>(point: (f32, f32), iter: I) -> bool
 		where I: Iterator<Item = (i32, i32)>

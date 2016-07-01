@@ -65,12 +65,12 @@ impl<T> TileNet<T>
 		let new_cols = m.1;
 		let new_rows = new_map.len() / new_cols;
 
-		self.map.iter()
+		self.map
+			.iter()
 			.enumerate()
 			.map(|x| (x.0 % self.cols, x.0 / self.cols, x.1))
 			.filter(|x| x.0 < new_cols && x.1 < new_rows)
-			// .inspect(|x| println!("{:?}", x))
-			.inspect(|x| *new_map.get_mut(x.0 + x.1*new_cols).unwrap() = x.2.clone())
+			.inspect(|x| *new_map.get_mut(x.0 + x.1 * new_cols).unwrap() = x.2.clone())
 			.count();
 
 		self.map = new_map;

@@ -1,7 +1,6 @@
 #![cfg_attr(feature = "dev", allow(unstable_features))]
 #![cfg_attr(feature = "dev", feature(plugin))]
 #![cfg_attr(feature = "dev", plugin(clippy))]
-#![allow(dead_code)]
 //! `TileNet` holds integer aligned tiles for broad phase continuous collision detection.
 //! The purpose of `TileNet` is to have a solid, tile-based, continuous, simple collision
 //! library for aspiring game programmers.
