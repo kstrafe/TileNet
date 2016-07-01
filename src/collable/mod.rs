@@ -10,7 +10,7 @@ pub struct Points<'a> {
 }
 
 impl<'a> Points<'a> {
-	fn new(offset: Vector, points: &'a [(f32, f32)]) -> Points {
+	pub fn new(offset: Vector, points: &'a [(f32, f32)]) -> Points {
 		Points {
 			index: 0,
 			offset: offset,
