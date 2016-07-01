@@ -1,7 +1,7 @@
 extern crate interleave;
 
 use std::fmt;
-use super::{TileView, TileSet, Rect};
+use super::{TileView, TileSet};
 
 /// `TileNet` is the main class in this library
 ///
@@ -140,15 +140,5 @@ impl<T> TileNet<T> {
 			tilenet: self,
 			points: list,
 		}
-	}
-
-	pub fn collision_between<'a, I>(&'a self, _: &Rect, _: &Rect) -> TileSet<'a, T, I>
-		where I: Iterator<Item = (i32, i32)>
-	{
-		unimplemented!();
-		// find all points in rect_a
-		// find all points in rect_b
-		// find all points from respective points of rectangles
-		// Return the tileset of those points
 	}
 }

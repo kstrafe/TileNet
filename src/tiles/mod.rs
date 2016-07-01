@@ -1,6 +1,5 @@
 use std::fmt;
 use std::cmp::min;
-pub use super::Rect;
 pub use self::tilenet::TileNet;
 
 mod tilenet;
@@ -38,7 +37,7 @@ mod tilenet;
 /// The ideal version of this library is quite simple:
 ///
 /// ```ignore
-/// use tile_net::{TileNet, Rect, Line};
+/// use tile_net::{TileNet, Line};
 /// let map: TileNet<MyTile> = TileNet::new((1000, 1000));
 /// initialize_map(&mut map);
 /// 'main: loop {
