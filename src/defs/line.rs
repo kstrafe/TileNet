@@ -36,7 +36,7 @@ impl Line {
 	/// The intended use for this iterator is in finding a collision
 	/// between a tile and a moving object.
 	///
-	pub fn supercover(&self) -> LineTiles {
+	pub fn supercover(&self) -> SuperCover {
 		let (start, stop) = (self.0, self.1);
 		let new = stop - start;
 		let (vx, vy) = (new.0, new.1);
@@ -68,7 +68,7 @@ impl Line {
 		let len = (stop.0.floor() as i64 - start.0.floor() as i64).abs() as usize +
 		          (stop.1.floor() as i64 - start.1.floor() as i64).abs() as usize;
 
-		LineTiles {
+		SuperCover {
 			it: 0,
 			len: len,
 			dx: dx,
@@ -101,7 +101,7 @@ impl Line {
 /// }
 /// ```
 #[derive(Clone)]
-pub struct LineTiles {
+pub struct SuperCover {
 	it: usize,
 	len: usize,
 	dx: f32,
@@ -116,7 +116,7 @@ pub struct LineTiles {
 	dest_y: i32,
 }
 
-impl LineTiles {
+impl SuperCover {
 	fn minimize_distance_from_zero(&mut self) {
 		// let minimal = self.ex.min(self.ey);
 		// self.ex -= minimal;
@@ -135,7 +135,7 @@ impl LineTiles {
 	}
 }
 
-impl Iterator for LineTiles {
+impl Iterator for SuperCover {
 	type Item = (i32, i32);
 	fn next(&mut self) -> Option<Self::Item> {
 		if self.it < self.len {

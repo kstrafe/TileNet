@@ -1,4 +1,4 @@
-pub use super::{LineTiles, Line, Vector, TileSet};
+pub use super::{SuperCover, Line, Vector, TileSet};
 
 pub use interleave::{IterList, MultiIter};
 

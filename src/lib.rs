@@ -29,7 +29,7 @@ mod collable;
 mod defs;
 mod tiles;
 
-pub use defs::{LineTiles, Line, Vector};
+pub use defs::{SuperCover, Line, Vector};
 pub use collable::{Collable, Points};
 pub use tiles::{TileNet, TileView, TileSet};
 
