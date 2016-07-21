@@ -4,7 +4,7 @@ version = "0.1.0-alpha"
 authors = ["Bourgond Aries <macocio@gmail.com>"]
 
 [dependencies]
-clippy = {version = "0.0.77", optional = true}
+clippy = { version = "0.0.79", optional = true }
 interleave = "0.2.4"
 
 [features]
