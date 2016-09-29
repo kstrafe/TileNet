@@ -67,7 +67,7 @@ pub trait Collable {
 	fn tiles(&self) -> MultiIter<(i32, i32)> {
 		let points = self.points();
 		let queued = self.queued();
-		let mut multi = interleave!((i32, i32));
+		let mut multi = interleave!((i32, i32););
 		for point in points {
 			let current = Vector::from_tuple(point);
 			let next = current + queued;
