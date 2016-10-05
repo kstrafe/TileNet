@@ -96,6 +96,10 @@ impl<T> TileNet<T> {
 		(self.map.len() / self.cols, self.cols)
 	}
 
+	pub fn view_all(&self) -> TileView<T> {
+		TileView::new(self, (0, self.cols, 0, self.map.len()/self.cols))
+	}
+
 	pub fn view_box(&self, rectangle: (usize, usize, usize, usize)) -> TileView<T> {
 		TileView::new(self, rectangle)
 	}
