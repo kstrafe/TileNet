@@ -100,6 +100,14 @@ impl<T> TileNet<T> {
 		TileView::new(self, (0, self.cols, 0, self.map.len()/self.cols))
 	}
 
+	pub fn view_center(&self, position: (usize, usize), span: (usize, usize)) -> TileView<T> {
+		let left = position.0.checked_sub(span.0).unwrap_or(0);
+		let top = position.1.checked_sub(span.1).unwrap_or(0);
+		let right = position.0 + span.0;
+		let bottom = position.1 + span.1;
+		TileView::new(self, (left, right, top, bottom))
+	}
+
 	pub fn view_box(&self, rectangle: (usize, usize, usize, usize)) -> TileView<T> {
 		TileView::new(self, rectangle)
 	}
