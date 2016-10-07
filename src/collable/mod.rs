@@ -33,7 +33,7 @@ impl<'a> Iterator for Points<'a> {
 }
 
 /// Trait for dynamic objects so they can easily check collisions with the `TileMap`
-pub trait Collable {
+pub trait Collable<T> {
 	/// Returns the set of points associated with this object. These points are used to
 	/// draw lines to their respective next points. For a rectangle, the four courners
 	/// may be points. For a circle, a whole bunch of points may be defined.
@@ -56,9 +56,8 @@ pub trait Collable {
 	///
 	/// IMPORTANT: You should add the move from queued_move to your point set. The ray tracer
 	/// also adds to find the next points. This will prevent you from getting stuck in a wall.
-	fn resolve<'a, T, I>(&mut self, set: TileSet<'a, T, I>) -> bool
-		where T: 'a,
-		      I: Iterator<Item = (i32, i32)>;
+	fn resolve<'a, I>(&mut self, set: TileSet<'a, T, I>) -> bool
+		where I: Iterator<Item = (i32, i32)>;
 
 	/// Gives us a list of points, sorted by proximity on the line.
 	///

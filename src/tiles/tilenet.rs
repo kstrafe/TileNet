@@ -11,14 +11,14 @@ use super::{TileView, TileSet};
 ///
 /// ```
 /// use tile_net::TileNet;
-/// #[derive(Clone, Debug)]
+/// #[derive(Clone, Debug, Default)]
 /// struct Example(i32);
 /// let my_net = TileNet::<Example>::new((10, 10));
 /// println!("{:?}", my_net);
 /// ```
 #[derive(Clone)]
 pub struct TileNet<T> {
-	map: Vec<Option<T>>,
+	map: Vec<T>,
 	cols: usize,
 }
 
@@ -42,22 +42,52 @@ impl<T: fmt::Debug> fmt::Debug for TileNet<T> {
 
 impl TileNet<usize> {
 	pub fn sample() -> TileNet<usize> {
-		TileNet::from_iter(10, (1..101).map(|x| if x > 50 { Some(x) } else { None }))
+		TileNet::from_iter(10, (1..101).map(|x| if x > 50 { x } else { 0 }))
 	}
 }
 
 impl<T> TileNet<T>
     where T: Clone
 {
+	pub fn draw_box(&mut self, value: &T, start: (usize, usize), stop: (usize, usize)) {
+		for i in start.1..stop.1 {
+			for j in start.0..stop.0 {
+				self.set(value, (j, i));
+			}
+		}
+	}
+
+	pub fn draw_row(&mut self, value: &T, row: usize) {
+		for i in 0..self.col_count() {
+			self.set(value, (i, row));
+		}
+	}
+
+	pub fn draw_col(&mut self, value: &T, col: usize) {
+		for i in 0..self.row_count() {
+			self.set(value, (col, i));
+		}
+	}
+
+	pub fn set(&mut self, value: &T, p: (usize, usize)) {
+		if let Some(old) = self.get_mut(p) {
+			*old = value.clone();
+		}
+	}
+}
+
+impl<T> TileNet<T>
+    where T: Clone + Default
+{
 	pub fn new(m: (usize, usize)) -> TileNet<T> {
 		TileNet {
-			map: vec![None; m.0*m.1],
+			map: vec![T::default(); m.0*m.1],
 			cols: m.1,
 		}
 	}
 
 	pub fn resize(&mut self, m: (usize, usize)) {
-		let mut new_map: Vec<Option<T>> = vec![None; m.0*m.1];
+		let mut new_map: Vec<T> = vec![T::default(); m.0*m.1];
 		let new_cols = m.1;
 		let new_rows = new_map.len() / new_cols;
 
@@ -74,9 +104,11 @@ impl<T> TileNet<T>
 	}
 }
 
-impl<T> TileNet<T> {
+impl<T> TileNet<T>
+    where T: Default
+{
 	pub fn from_iter<I>(columns: usize, iter: I) -> TileNet<T>
-		where I: Iterator<Item = Option<T>>
+		where I: Iterator<Item = T>
 	{
 		let mut tilenet = TileNet {
 			map: vec![],
@@ -86,18 +118,36 @@ impl<T> TileNet<T> {
 		let remainder = tilenet.map.len() % tilenet.cols;
 		if remainder != 0 {
 			for _ in 0..tilenet.cols - remainder {
-				tilenet.map.push(None);
+				tilenet.map.push(T::default());
 			}
 		}
 		tilenet
 	}
+}
+
+impl<T> TileNet<T> {
+	pub fn row_count(&self) -> usize {
+		self.map.len() / self.cols
+	}
+
+	pub fn col_count(&self) -> usize {
+		self.cols
+	}
+
+	pub fn get(&self, p: (usize, usize)) -> Option<&T> {
+		if p.0 >= self.cols {
+			None
+		} else {
+			self.map.get(p.0 + p.1 * self.cols)
+		}
+	}
 
 	pub fn get_size(&self) -> (usize, usize) {
-		(self.map.len() / self.cols, self.cols)
+		(self.row_count(), self.cols)
 	}
 
 	pub fn view_all(&self) -> TileView<T> {
-		TileView::new(self, (0, self.cols, 0, self.map.len()/self.cols))
+		TileView::new(self, (0, self.cols, 0, self.map.len() / self.cols))
 	}
 
 	pub fn view_center(&self, position: (usize, usize), span: (usize, usize)) -> TileView<T> {
@@ -111,34 +161,12 @@ impl<T> TileNet<T> {
 	pub fn view_box(&self, rectangle: (usize, usize, usize, usize)) -> TileView<T> {
 		TileView::new(self, rectangle)
 	}
-
-	pub fn get(&self, p: (usize, usize)) -> Option<&Option<T>> {
-		if p.0 >= self.cols {
-			None
-		} else {
-			self.map.get(p.0 + p.1 * self.cols)
-		}
-	}
-
-	pub fn get_mut(&mut self, p: (usize, usize)) -> Option<&mut Option<T>> {
+	pub fn get_mut(&mut self, p: (usize, usize)) -> Option<&mut T> {
 		if p.0 >= self.cols {
 			None
 		} else {
 			self.map.get_mut(p.0 + p.1 * self.cols)
 		}
-	}
-
-	pub fn is_occupied(&self, p: (usize, usize)) -> bool {
-		match self.get(p) {
-			Some(tile) => tile.is_some(),
-			None => true,
-		}
-	}
-
-	pub fn any_occupied<I>(&self, mut list: I) -> bool
-		where I: Iterator<Item = (usize, usize)>
-	{
-		list.any(|p| self.is_occupied(p))
 	}
 
 	pub fn collide_set<I>(&self, list: I) -> TileSet<T, I>

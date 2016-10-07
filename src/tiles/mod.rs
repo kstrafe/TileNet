@@ -66,7 +66,7 @@ impl<'a, T, I> Iterator for TileSet<'a, T, I>
 	where T: 'a,
 	      I: Iterator<Item = (i32, i32)>
 {
-	type Item = &'a Option<T>;
+	type Item = &'a T;
 	fn next(&mut self) -> Option<Self::Item> {
 		if let Some(point) = self.points.next() {
 			if point.0 >= 0 && point.1 >= 0 {
@@ -126,7 +126,7 @@ impl<'a, T> TileView<'a, T>
 impl<'a, T> Iterator for TileView<'a, T>
     where T: 'a
 {
-	type Item = (&'a Option<T>, usize, usize);
+	type Item = (&'a T, usize, usize);
 	fn next(&mut self) -> Option<Self::Item> {
 		if self.current.1 >= self.rectangle.3 {
 			return None;
