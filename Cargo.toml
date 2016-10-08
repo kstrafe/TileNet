@@ -10,3 +10,6 @@ interleave = "1.0"
 [features]
 default = []
 dev = ["clippy"]
+
+[dev-dependencies]
+sfml = "0.11.2"

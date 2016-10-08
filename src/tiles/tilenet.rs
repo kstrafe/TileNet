@@ -150,6 +150,11 @@ impl<T> TileNet<T> {
 		TileView::new(self, (0, self.cols, 0, self.map.len() / self.cols))
 	}
 
+	pub fn view_center_f32(&self, position: (f32, f32), span: (usize, usize)) -> TileView<T> {
+		let position = (position.0.max(0.0) as usize, position.1.max(0.0) as usize);
+		self.view_center(position, span)
+	}
+
 	pub fn view_center(&self, position: (usize, usize), span: (usize, usize)) -> TileView<T> {
 		let left = position.0.checked_sub(span.0).unwrap_or(0);
 		let top = position.1.checked_sub(span.1).unwrap_or(0);

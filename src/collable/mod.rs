@@ -66,7 +66,7 @@ pub trait Collable<T> {
 	/// Used to process the result from the resolve loop.
 	fn postsolve(&mut self, _collided_once: bool, _resolved: bool) {}
 
-	/// Convenienve function for the resolve loop
+	/// Convenience function for the resolve loop
 	///
 	/// Calls presolve at the beginning and postsolve at the end.
 	/// Runs the resolve function in a loop of at max 30 iterations.
