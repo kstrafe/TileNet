@@ -10,6 +10,9 @@ use sfml::window::{Key, VideoMode, event, window_style};
 use sfml::system::Vector2f;
 use tile_net::*;
 
+static SIZE: f32 = 30.0;
+static WINDOW: (u32, u32) = (800, 600);
+
 fn main() {
 
 	let mut window = create_window();
@@ -17,6 +20,8 @@ fn main() {
 	let mut tile = create_block();
 	let mut coller = Rects::new();
 	let gravity = 0.00981;
+
+	println!["Use WASD to move around"];
 
 	'main: loop {
 		if handle_events(&mut window) {
@@ -48,16 +53,18 @@ fn main() {
 		coller.solve(&net);
 
 		window.clear(&Color::new_rgb(255, 255, 255));
-		let mut view = View::new().unwrap();
+		let mut view = View::new_init(&Vector2f::new(0.0, 0.0),
+		                              &Vector2f::new(WINDOW.0 as f32, WINDOW.1 as f32))
+			.unwrap();
 		let pos = coller.get_pos();
-		view.set_center(&Vector2f::new(pos.0 * 10.0, pos.1 * 10.0));
+		view.set_center(&Vector2f::new(pos.0 * SIZE, pos.1 * SIZE));
 		window.set_view(&view);
 
 		for i in net.view_center_f32((pos.0, pos.1), (120usize, 60usize)) {
 			if let (&1, col, row) = i {
 				let col = col as f32;
 				let row = row as f32;
-				tile.set_position(&Vector2f::new(col * 10.0, row * 10.0));
+				tile.set_position(&Vector2f::new(col * SIZE, row * SIZE));
 				window.draw(&tile);
 			}
 		}
@@ -67,7 +74,7 @@ fn main() {
 }
 
 fn create_window() -> RenderWindow {
-	let mut window = RenderWindow::new(VideoMode::new_init(800, 600, 42),
+	let mut window = RenderWindow::new(VideoMode::new_init(WINDOW.0, WINDOW.1, 42),
 	                                   "Custom shape",
 	                                   window_style::CLOSE,
 	                                   &Default::default())
@@ -83,12 +90,13 @@ fn create_tilenet() -> tile_net::TileNet<usize> {
 	net.set_box(&0, (0, 0), (10, 10));
 	net.set_box(&1, (1, 1), (9, 9));
 	net.set_box(&0, (2, 2), (8, 8));
+	net.set_box(&1, (4, 4), (6, 6));
 	net
 }
 
 fn create_block<'a>() -> RectangleShape<'a> {
 	let mut block = RectangleShape::new().unwrap();
-	block.set_size(&Vector2f::new(10.0, 10.0));
+	block.set_size(&Vector2f::new(SIZE, SIZE));
 	block.set_fill_color(&Color::new_rgb(0, 0, 0));
 	block
 }
@@ -207,7 +215,7 @@ impl Collable<usize> for Rects {
 impl Drawable for Rects {
 	fn draw<R: RenderTarget>(&self, rt: &mut R, _: &mut RenderStates) {
 		let mut block = create_block();
-		block.set_position(&Vector2f::new(self.pos.0 * 10.0, self.pos.1 * 10.0));
+		block.set_position(&Vector2f::new(self.pos.0 * SIZE, self.pos.1 * SIZE));
 		rt.draw(&block);
 	}
 }

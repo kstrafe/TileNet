@@ -297,9 +297,91 @@
 //!     // Draw here!
 //!     println!["{}-{} = {}", row, col, value];
 //!   }
+//!   // Same as `view_center` but allows floats for the first pair.
+//!   // Makes sure that the left-most bound will always be 0.
+//!   for element in net.view_center_f32((3.0, 3.0), (4, 2)) {
+//!     let (value, col, row) = element;
+//!     // Draw here!
+//!     println!["{}-{} = {}", row, col, value];
+//!   }
 //! }
 //! ```
-
+//! # Ergonomics #
+//! Instead of using a manual loop, you can use the built-in `solve`. Which calls `presolve`,
+//! runs a loop around `resolve`, and then calls `postsolve` with bools denoting whether a
+//! solution was found and at least a single collision was encountered.
+//!
+//! ```
+//! extern crate tile_net;
+//! use tile_net::*;
+//!
+//! fn main() {
+//!   let mut net: TileNet<usize> = TileNet::new((10, 10));
+//!   net.set_row(&1, 0);
+//!   net.set_row(&2, 9);
+//!   net.set_col(&3, 0);
+//!   net.set_col(&4, 9);
+//!   net.set_box(&5, (3, 3), (5, 7));
+//!   println!["{:?}", net];
+//!
+//!   let mut collider = MyObject::new();
+//!   collider.solve(&net);  // Much simpler than the loop!
+//!   println!["{:?}", collider];
+//! }
+//!
+//! #[derive(Debug)]
+//! struct MyObject {
+//!   pts: Vec<(f32, f32)>,
+//!   pos: Vector,
+//!   mov: Vector,
+//! }
+//!
+//! impl MyObject {
+//!   fn new() -> MyObject {
+//!     MyObject {
+//!       pts: vec![(0.0, 0.0), (1.0, 0.0), (0.0, 1.0), (1.0, 1.0)],
+//!       pos: Vector(1.1, 1.1),
+//!       mov: Vector(100.0, 100.0),
+//!     }
+//!   }
+//!
+//! }
+//!
+//! impl Collable<usize> for MyObject {
+//!   fn points<'a>(&'a self) -> Points<'a> {
+//!     Points::new(self.pos, &self.pts)
+//!   }
+//!
+//!   fn queued(&self) -> Vector {
+//!     self.mov
+//!   }
+//!
+//!   fn postsolve(&mut self, _collided_once: bool, resolved: bool) {
+//!     if resolved {
+//!       println!["Able to move"];
+//!     } else {
+//!       println!["Unable to move"];
+//!     }
+//!   }
+//!
+//!   fn resolve<'a, I>(&mut self, mut set: TileSet<'a, usize, I>) -> bool
+//!     where I: Iterator<Item = (i32, i32)>
+//!   {
+//!     if set.all(|x| *x == 0) {  // If there is no collision (we only collide with non-zero tiles)
+//!       self.pos = self.pos + self.mov;
+//!       self.mov = Vector(0.0, 0.0);
+//!       true  // Means we resolved correctly
+//!     } else if self.mov.norm2sq() > 1e-6 {  // There was collision, but our speed isn't tiny
+//!       self.mov.scale(0.9);
+//!       false  // Means we did not resolve collision
+//!     } else {
+//!       true
+//!     }
+//!   }
+//! }
+//! ```
+//! See the examples section for an example where we use presolve and postsolve
+//! to find out if our object can jump or not.
 
 
 #[macro_use(interleave)]
