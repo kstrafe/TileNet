@@ -380,7 +380,7 @@
 //!   }
 //! }
 //! ```
-//! See the examples section for an example where we use presolve and postsolve
+//! See the examples directory for an example where we use presolve and postsolve
 //! to find out if our object can jump or not.
 
 

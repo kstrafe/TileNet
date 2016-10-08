@@ -1,6 +1,6 @@
 [package]
 name = "tile_net"
-version = "0.1.0-alpha"
+version = "1.0.0"
 authors = ["Bourgond Aries <macocio@gmail.com>"]
 
 [dependencies]
