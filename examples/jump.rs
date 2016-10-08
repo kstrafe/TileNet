@@ -1,0 +1,213 @@
+#![cfg_attr(feature = "dev", allow(unstable_features))]
+#![cfg_attr(feature = "dev", feature(plugin))]
+#![cfg_attr(feature = "dev", plugin(clippy))]
+extern crate sfml;
+extern crate tile_net;
+
+use sfml::graphics::{Color, RectangleShape, RenderTarget, RenderWindow, Shape, Transformable,
+                     Drawable, RenderStates, View};
+use sfml::window::{Key, VideoMode, event, window_style};
+use sfml::system::Vector2f;
+use tile_net::*;
+
+fn main() {
+
+	let mut window = create_window();
+	let net = create_tilenet();
+	let mut tile = create_block();
+	let mut coller = Rects::new();
+	let gravity = 0.00981;
+
+	'main: loop {
+		if handle_events(&mut window) {
+			break 'main;
+		}
+
+		let side_speed = 0.4;
+		let vert_speed = 0.45;
+		if Key::A.is_pressed() {
+			coller.enqueue(Vector(-side_speed, 0.0));
+		}
+		if Key::D.is_pressed() {
+			coller.enqueue(Vector(side_speed, 0.0));
+		}
+
+		let dy = coller.check_x();
+		coller.solve(&net);
+		coller.uncheck_x(dy);
+
+		if Key::W.is_pressed() && coller.jmp {
+			coller.set_speed(Vector(0.0, -vert_speed));
+			coller.jmp = false;
+		}
+		if Key::S.is_pressed() {
+			coller.enqueue(Vector(0.0, vert_speed * 100000.0));
+		}
+
+		coller.enqueue(Vector(0.0, gravity));
+		coller.solve(&net);
+
+		window.clear(&Color::new_rgb(255, 255, 255));
+		let mut view = View::new().unwrap();
+		let pos = coller.get_pos();
+		view.set_center(&Vector2f::new(pos.0 * 10.0, pos.1 * 10.0));
+		window.set_view(&view);
+
+		for i in net.view_center_f32((pos.0, pos.1), (120usize, 60usize)) {
+			if let (&1, col, row) = i {
+				let col = col as f32;
+				let row = row as f32;
+				tile.set_position(&Vector2f::new(col * 10.0, row * 10.0));
+				window.draw(&tile);
+			}
+		}
+		window.draw(&coller);
+		window.display();
+	}
+}
+
+fn create_window() -> RenderWindow {
+	let mut window = RenderWindow::new(VideoMode::new_init(800, 600, 42),
+	                                   "Custom shape",
+	                                   window_style::CLOSE,
+	                                   &Default::default())
+		.unwrap_or_else(|| {
+			panic!("Could not create window");
+		});
+	window.set_framerate_limit(60);
+	window
+}
+
+fn create_tilenet() -> tile_net::TileNet<usize> {
+	let mut net: TileNet<usize> = tile_net::TileNet::new((10, 10));
+	net.set_box(&0, (0, 0), (10, 10));
+	net.set_box(&1, (1, 1), (9, 9));
+	net.set_box(&0, (2, 2), (8, 8));
+	net
+}
+
+fn create_block<'a>() -> RectangleShape<'a> {
+	let mut block = RectangleShape::new().unwrap();
+	block.set_size(&Vector2f::new(10.0, 10.0));
+	block.set_fill_color(&Color::new_rgb(0, 0, 0));
+	block
+}
+
+fn handle_events(window: &mut RenderWindow) -> bool {
+	for event in window.events() {
+		match event {
+			event::Closed => return true,
+			event::KeyPressed { code, .. } => {
+				if let Key::Escape = code {
+					return true;
+				}
+			}
+			_ => {}
+		}
+	}
+	false
+}
+
+#[derive(Debug)]
+struct Rects {
+	pts: Vec<(f32, f32)>,
+	pos: Vector,
+	mov: Vector,
+	jmp: bool,
+	checking_x: bool,
+	downward: bool,
+}
+
+impl Rects {
+	fn new() -> Rects {
+		Rects {
+			pts: vec![(0.0, 0.0), (0.99, 0.0), (0.0, 0.99), (0.99, 0.99)],
+			pos: Vector(2.0, 2.0),
+			mov: Vector(0.0, 0.0),
+			jmp: false,
+			checking_x: false,
+			downward: false,
+		}
+	}
+
+	fn check_x(&mut self) -> f32 {
+		self.checking_x = true;
+		let tmp = self.mov.1;
+		self.mov = Vector(self.mov.0, 0.0);
+		tmp
+	}
+
+	fn uncheck_x(&mut self, dy: f32) {
+		self.checking_x = false;
+		self.mov = Vector(self.mov.0, dy);
+	}
+
+	fn set_speed(&mut self, vec: Vector) {
+		self.mov = vec;
+	}
+
+	fn get_pos(&self) -> Vector {
+		self.pos
+	}
+
+	fn enqueue(&mut self, vector: Vector) {
+		self.mov = self.mov + vector;
+	}
+}
+
+impl Collable<usize> for Rects {
+	fn presolve(&mut self) {
+		if !self.checking_x {
+			self.downward = self.mov.1 > 1e-6;
+		}
+	}
+
+	fn postsolve(&mut self, collided_once: bool, _resolved: bool) {
+		if !self.checking_x {
+			if collided_once && self.downward {
+				self.jmp = true;
+			} else {
+				self.jmp = false;
+			}
+		}
+	}
+
+	fn points(&self) -> Points {
+		Points::new(self.pos, &self.pts)
+	}
+
+	fn queued(&self) -> Vector {
+		self.mov
+	}
+
+	fn resolve<I>(&mut self, mut set: TileSet<usize, I>) -> bool
+		where I: Iterator<Item = (i32, i32)>
+	{
+		let mut mov = self.mov;
+		self.mov = Vector(0.0, 0.0);
+		if set.all(|x| *x == 0usize) {
+			self.pos = self.pos + mov;
+			self.mov = Vector(0.0, mov.1);
+			true
+		} else if mov.norm2sq() > 1e-6 {
+			if self.checking_x {
+				mov = Vector(mov.0 * 0.59, mov.1);
+				self.mov = mov;
+			} else {
+				mov.scale(0.6);
+				self.mov = mov;
+			}
+			false
+		} else {
+			true
+		}
+	}
+}
+
+impl Drawable for Rects {
+	fn draw<R: RenderTarget>(&self, rt: &mut R, _: &mut RenderStates) {
+		let mut block = create_block();
+		block.set_position(&Vector2f::new(self.pos.0 * 10.0, self.pos.1 * 10.0));
+		rt.draw(&block);
+	}
+}
