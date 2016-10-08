@@ -1,4 +1,4 @@
-pub use super::{SuperCover, Line, Vector, TileSet};
+pub use super::{SuperCover, Line, Vector, TileNet, TileSet};
 
 pub use interleave::{IterList, MultiIter};
 
@@ -54,6 +54,39 @@ pub trait Collable<T> {
 	/// IMPORTANT: You should add the move from queued_move to your point set. The ray tracer
 	/// also adds to find the next points. This will prevent you from getting stuck in a wall.
 	fn resolve<I>(&mut self, set: TileSet<T, I>) -> bool where I: Iterator<Item = (i32, i32)>;
+
+	/// Called at the beginning of `solve`
+	///
+	/// This method is useful when resetting internal variables of state.
+	/// An example of this is when you have to set a has-jumped variable.
+	fn presolve(&mut self) {}
+
+	/// Called at the end of `solve`.
+	///
+	/// Used to process the result from the resolve loop.
+	fn postsolve(&mut self, _collided_once: bool, _resolved: bool) {}
+
+	/// Convenienve function for the resolve loop
+	///
+	/// Calls presolve at the beginning and postsolve at the end.
+	/// Runs the resolve function in a loop of at max 30 iterations.
+	/// This is to avoid potential deadlock if the resolve function
+	/// is poorly coded and returns false all the time.
+	fn solve(&mut self, net: &TileNet<T>) {
+		self.presolve();
+		static MAX_ITERATIONS: usize = 30;
+		let mut collided_once = false;
+		let mut resolved = false;
+		for _ in 0..MAX_ITERATIONS {
+			let tiles = net.collide_set(self.tiles());
+			if self.resolve(tiles) {
+				resolved = true;
+				break;
+			}
+			collided_once = true;
+		}
+		self.postsolve(collided_once, resolved);
+	}
 
 	/// Gives us a list of points, sorted by proximity on the line.
 	///
