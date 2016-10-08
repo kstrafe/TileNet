@@ -259,7 +259,7 @@
 //! ```
 //!
 //! You can try to use more nuanced methods instead of scaling down and checking again. One method
-//! may be to check the//! first collision point and scale down to the distance thereof.
+//! may be to check the first collision point and scale down to the distance thereof.
 //! Everything is iterator based.
 //!
 //! # TileView #
@@ -290,7 +290,8 @@
 //!     println!["{}-{} = {}", row, col, value];
 //!   }
 //!   // Looks from (0, 1) to (6, 5). This takes care of negative indices that may be created.
-//!   // The first argument represents the center. The second argument is the span around that center.
+//!   // The first argument represents the center. The second argument is the span around that
+//!   // center.
 //!   for element in net.view_center((3, 3), (4, 2)) {
 //!     let (value, col, row) = element;
 //!     // Draw here!
