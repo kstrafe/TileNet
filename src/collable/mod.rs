@@ -2,7 +2,10 @@ pub use super::{SuperCover, Line, Vector, TileSet};
 
 pub use interleave::{IterList, MultiIter};
 
-
+/// A vertex iterator.
+///
+/// Used internally by the collision engine. It combines static
+/// points with an offset. Every iteration returns the point + offset.
 pub struct Points<'a> {
 	index: usize,
 	offset: Vector,

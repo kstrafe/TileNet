@@ -17,7 +17,7 @@
 //! becomes worse as you approach 2^24. The technical reason is that a 32-bit float
 //! has 24 bits in its mantissa.
 //!
-//! # Examples #
+//! # Examples - Setting Up #
 //! We start out by including tile net into our program and creating an empty net
 //!
 //! ```
@@ -79,6 +79,7 @@
 //! }
 //! ```
 //!
+//! # Collision Detection #
 //! `TileNet` is not used for drawing tiles to a grid, its main focus is continuous, tile-vertex
 //! collision detection.
 //! Continuous collision detection (CCD) prevents objects tunneling through other objects in a
@@ -173,6 +174,7 @@
 //! This is how we can almost perfectly find the position.
 //! You may employ other methods inside resolve. Whatever suits your needs.
 //! Here is the example again but this time we resolve the collision using a loop
+//!
 //! ```
 //! extern crate tile_net;
 //! use tile_net::*;
@@ -259,6 +261,44 @@
 //! You can try to use more nuanced methods instead of scaling down and checking again. One method
 //! may be to check the//! first collision point and scale down to the distance thereof.
 //! Everything is iterator based.
+//!
+//! # TileView #
+//! For drawing you may want to avoid sending huge grids to the GPU, so we use a view from the grid.
+//!
+//! ```
+//! extern crate tile_net;
+//! use tile_net::*;
+//! fn main() {
+//!   let mut net: TileNet<usize> = TileNet::new((10, 10));
+//!   net.set_row(&1, 0);
+//!   net.set_row(&2, 9);
+//!   net.set_col(&3, 0);
+//!   net.set_col(&4, 9);
+//!   net.set_box(&5, (3, 3), (5, 7));
+//!   println!["{:?}", net];
+//!   // This creates a box with x from 0 to 4 and y from 3 to 6
+//!   // Note that the last elements are not included (so for x: 0, 1, 2, 3, but not 4)
+//!   for element in net.view_box((0, 4, 3, 6)) {
+//!     let (value, col, row) = element;
+//!     // Draw here!
+//!     println!["{}-{} = {}", row, col, value];
+//!   }
+//!   // This just prints every single element in the net
+//!   for element in net.view_all() {
+//!     let (value, col, row) = element;
+//!     // Draw here!
+//!     println!["{}-{} = {}", row, col, value];
+//!   }
+//!   // Looks from (0, 1) to (6, 5). This takes care of negative indices that may be created.
+//!   // The first argument represents the center. The second argument is the span around that center.
+//!   for element in net.view_center((3, 3), (4, 2)) {
+//!     let (value, col, row) = element;
+//!     // Draw here!
+//!     println!["{}-{} = {}", row, col, value];
+//!   }
+//! }
+//! ```
+
 
 
 #[macro_use(interleave)]

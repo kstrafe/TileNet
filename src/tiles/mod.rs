@@ -4,17 +4,6 @@ pub use self::tilenet::TileNet;
 
 mod tilenet;
 
-
-// impl TileBased for Character {
-// /// Get all the points of the object that need to be used in collision
-// fn points(&self) -> VectorSet;
-// /// Queue a movement: translate all points by vector
-// fn queue_move(&mut self, vector: Vector);
-// fn queued_move(&self) -> Vector;
-// /// Resolve the collision
-// fn resolve_move(&mut self, TileSet<T>) -> bool;
-// }
-//
 /// Tile iterator returning tiles from the `tile_net::TileNet`.
 ///
 /// ```
@@ -37,6 +26,7 @@ mod tilenet;
 /// The ideal version of this library is quite simple:
 ///
 /// ```ignore
+/// // Pseudocode
 /// use tile_net::{TileNet, Line};
 /// let map: TileNet<MyTile> = TileNet::new((1000, 1000));
 /// initialize_map(&mut map);
