@@ -39,12 +39,6 @@ pub trait Collable<T> {
 	/// may be points. For a circle, a whole bunch of points may be defined.
 	fn points(&self) -> Points;
 
-	/// Instructs the object to store (queue) a change in position. This may be useful when
-	/// you have an event loop and you'd like to move a character. You call this function.
-	/// An AI handler may also queue a move. It's up to you if you want to add moves
-	/// together or store them in any other way.
-	fn enqueue(&mut self, vector: Vector);
-
 	/// Get the previously queued move. Should reasonably return what was given in `enqueue`,
 	/// but you can do whatever makes sense in your application.
 	fn queued(&self) -> Vector;
@@ -56,8 +50,7 @@ pub trait Collable<T> {
 	///
 	/// IMPORTANT: You should add the move from queued_move to your point set. The ray tracer
 	/// also adds to find the next points. This will prevent you from getting stuck in a wall.
-	fn resolve<'a, I>(&mut self, set: TileSet<'a, T, I>) -> bool
-		where I: Iterator<Item = (i32, i32)>;
+	fn resolve<I>(&mut self, set: TileSet<T, I>) -> bool where I: Iterator<Item = (i32, i32)>;
 
 	/// Gives us a list of points, sorted by proximity on the line.
 	///

@@ -19,10 +19,12 @@ impl Vector {
 		Vector(tuple.0, tuple.1)
 	}
 
+	/// Compute the 2-norm squared, used for checking the total speed
 	pub fn norm2sq(&self) -> f32 {
 		self.0 * self.0 + self.1 * self.1
 	}
 
+	/// Scale both vector elements linearly
 	pub fn scale(&mut self, factor: f32) {
 		self.0 *= factor;
 		self.1 *= factor;

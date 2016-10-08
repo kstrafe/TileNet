@@ -49,7 +49,7 @@ impl TileNet<usize> {
 impl<T> TileNet<T>
     where T: Clone
 {
-	pub fn draw_box(&mut self, value: &T, start: (usize, usize), stop: (usize, usize)) {
+	pub fn set_box(&mut self, value: &T, start: (usize, usize), stop: (usize, usize)) {
 		for i in start.1..stop.1 {
 			for j in start.0..stop.0 {
 				self.set(value, (j, i));
@@ -57,13 +57,13 @@ impl<T> TileNet<T>
 		}
 	}
 
-	pub fn draw_row(&mut self, value: &T, row: usize) {
+	pub fn set_row(&mut self, value: &T, row: usize) {
 		for i in 0..self.col_count() {
 			self.set(value, (i, row));
 		}
 	}
 
-	pub fn draw_col(&mut self, value: &T, col: usize) {
+	pub fn set_col(&mut self, value: &T, col: usize) {
 		for i in 0..self.row_count() {
 			self.set(value, (col, i));
 		}
