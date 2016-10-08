@@ -7,7 +7,7 @@
 //!
 //! # How it works #
 //! The library is built on the DDA Supercover algorithm, which is an extension of
-//! Bresenham's algorithm. For each point moving, it creates a line. Each line's
+//! Bresenham's algorithm. For each moving vertex it creates a line. Each line's
 //! overlapping tiles are reported. Your dynamic object decides how it should move.
 //! It may adjust speed, and retry the collision. It may also accept and move.
 //!
