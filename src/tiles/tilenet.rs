@@ -49,6 +49,10 @@ impl TileNet<usize> {
 impl<T> TileNet<T>
     where T: Clone
 {
+	pub fn get_raw(&self) -> &Vec<T> {
+		&self.map
+	}
+
 	pub fn set_box(&mut self, value: &T, start: (usize, usize), stop: (usize, usize)) {
 		for i in start.1..stop.1 {
 			for j in start.0..stop.0 {
