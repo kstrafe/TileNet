@@ -46,9 +46,97 @@ impl TileNet<usize> {
 	}
 }
 
+pub struct TileNetProxy<'a, T: 'a> {
+	tilenet: &'a mut TileNet<T>,
+	min_x: usize,
+	max_x: usize,
+	min_y: usize,
+	max_y: usize,
+}
+
+type Span = (usize, usize, usize, usize);
+impl<'a, T> TileNetProxy<'a, T>
+    where T: Clone
+{
+	pub fn get_span(&self) -> Span {
+		(self.min_x, self.min_y, self.max_x, self.max_y)
+	}
+
+	pub fn set_box(&mut self, value: &T, start: (usize, usize), stop: (usize, usize)) -> Span {
+		self.tilenet.set_box(value, start, stop);
+		if start.0 < self.min_x {
+			self.min_x = start.0;
+		}
+		if start.1 < self.min_y {
+			self.min_y = start.1;
+		}
+		if stop.0 > self.max_x {
+			self.max_x = stop.0;
+		}
+		if stop.1 > self.max_y && stop.1 < self.tilenet.get_size().1 {
+			self.max_y = stop.1;
+		}
+		self.get_span()
+	}
+
+	pub fn set_row(&mut self, value: &T, row: usize) -> Span {
+		self.tilenet.set_row(value, row);
+		self.min_x = 0;
+		self.max_x = self.tilenet.get_size().0;
+		if row < self.min_y {
+			self.min_y = row;
+		}
+		if row > self.max_y && row < self.tilenet.get_size().1 {
+			self.max_y = row;
+		}
+		self.get_span()
+	}
+
+	pub fn set_col(&mut self, value: &T, col: usize) -> Span {
+		self.tilenet.set_col(value, col);
+		self.min_y = 0;
+		self.max_y = self.tilenet.get_size().1;
+		if col < self.min_x {
+			self.min_x = col;
+		}
+		if col > self.max_x && col < self.tilenet.get_size().0 {
+			self.max_x = col;
+		}
+		self.get_span()
+	}
+
+	pub fn set(&mut self, value: &T, p: (usize, usize)) -> Span {
+		self.tilenet.set(value, p);
+		if p.0 < self.min_x {
+			self.min_x = p.0;
+		}
+		if p.1 < self.min_y {
+			self.min_y = p.1;
+		}
+		if p.0 > self.max_x && p.0 < self.tilenet.get_size().0 {
+			self.max_x = p.0;
+		}
+		if p.1 > self.max_y && p.1 < self.tilenet.get_size().1 {
+			self.max_y = p.1;
+		}
+		self.get_span()
+	}
+}
+
 impl<T> TileNet<T>
     where T: Clone
 {
+	pub fn prepare(&mut self) -> TileNetProxy<T> {
+		let size = self.get_size();
+		TileNetProxy {
+			tilenet: self,
+			min_x: size.0,
+			max_x: 0,
+			min_y: size.1,
+			max_y: 0,
+		}
+	}
+
 	pub fn get_raw(&self) -> &[T] {
 		self.map.as_slice()
 	}
