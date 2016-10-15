@@ -103,8 +103,8 @@ impl<'a, T> TileView<'a, T>
 	fn new(tilenet: &'a TileNet<T>,
 	       mut rectangle: (usize, usize, usize, usize))
 	       -> TileView<'a, T> {
-		rectangle.1 = min(rectangle.1, tilenet.get_size().1);
-		rectangle.3 = min(rectangle.3, tilenet.get_size().0);
+		rectangle.1 = min(rectangle.1, tilenet.get_size().0);
+		rectangle.3 = min(rectangle.3, tilenet.get_size().1);
 		TileView {
 			tilenet: tilenet,
 			rectangle: rectangle,

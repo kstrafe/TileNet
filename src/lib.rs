@@ -24,7 +24,7 @@
 //! extern crate tile_net;
 //! use tile_net::*;
 //! fn main() {
-//!   let net: TileNet<usize> = TileNet::new((10, 10));
+//!   let net: TileNet<usize> = TileNet::new(10, 10);
 //!   println!["{:?}", net];
 //! }
 //!
@@ -37,7 +37,7 @@
 //! extern crate tile_net;
 //! use tile_net::*;
 //! fn main() {
-//!   let mut net: TileNet<usize> = TileNet::new((10, 10));
+//!   let mut net: TileNet<usize> = TileNet::new(10, 10);
 //!   net.set(&1, (9, 0));
 //!   println!["{:?}", net];
 //! }
@@ -50,7 +50,7 @@
 //! extern crate tile_net;
 //! use tile_net::*;
 //! fn main() {
-//!   let mut net: TileNet<usize> = TileNet::new((10, 10));
+//!   let mut net: TileNet<usize> = TileNet::new(10, 10);
 //!   net.set_row(&1, 0);
 //!   net.set_row(&1, 9);
 //!   net.set_col(&1, 0);
@@ -69,7 +69,7 @@
 //! #[derive(Clone, Debug, Default)]
 //! struct Example(i32);
 //! fn main() {
-//!   let mut net: TileNet<Example> = TileNet::new((10, 10));  // Requires Default trait
+//!   let mut net: TileNet<Example> = TileNet::new(10, 10);  // Requires Default trait
 //!   net.set_row(&Example(1), 0);  // Requires Clone trait
 //!   net.set_row(&Example(2), 9);
 //!   net.set_col(&Example(3), 0);
@@ -93,7 +93,7 @@
 //! use tile_net::*;
 //!
 //! fn main() {
-//!   let mut net: TileNet<usize> = TileNet::new((10, 10));
+//!   let mut net: TileNet<usize> = TileNet::new(10, 10);
 //!   net.set_row(&1, 0);
 //!   net.set_row(&2, 9);
 //!   net.set_col(&3, 0);
@@ -180,7 +180,7 @@
 //! use tile_net::*;
 //!
 //! fn main() {
-//!   let mut net: TileNet<usize> = TileNet::new((10, 10));
+//!   let mut net: TileNet<usize> = TileNet::new(10, 10);
 //!   net.set_row(&1, 0);
 //!   net.set_row(&2, 9);
 //!   net.set_col(&3, 0);
@@ -269,7 +269,7 @@
 //! extern crate tile_net;
 //! use tile_net::*;
 //! fn main() {
-//!   let mut net: TileNet<usize> = TileNet::new((10, 10));
+//!   let mut net: TileNet<usize> = TileNet::new(10, 10);
 //!   net.set_row(&1, 0);
 //!   net.set_row(&2, 9);
 //!   net.set_col(&3, 0);
@@ -316,7 +316,7 @@
 //! use tile_net::*;
 //!
 //! fn main() {
-//!   let mut net: TileNet<usize> = TileNet::new((10, 10));
+//!   let mut net: TileNet<usize> = TileNet::new(10, 10);
 //!   net.set_row(&1, 0);
 //!   net.set_row(&2, 9);
 //!   net.set_col(&3, 0);
@@ -401,7 +401,7 @@ mod tests {
 
 	#[test]
 	fn get() {
-		let map: TileNet<usize> = TileNet::new((10, 10));
+		let map: TileNet<usize> = TileNet::new(10, 10);
 		assert_eq!(Some(&0), map.get((9, 9)));
 		assert_eq!(None, map.get((10, 9)));
 		assert_eq!(None, map.get((9, 10)));
@@ -409,7 +409,7 @@ mod tests {
 
 	#[test]
 	fn get_mut() {
-		let mut map: TileNet<usize> = TileNet::new((10, 10));
+		let mut map: TileNet<usize> = TileNet::new(10, 10);
 		*map.get_mut((9, 9)).unwrap() = 10;
 		assert_eq!(Some(&10), map.get((9, 9)));
 		*map.get_mut((9, 9)).unwrap() = 1;
@@ -418,15 +418,15 @@ mod tests {
 
 	#[test]
 	fn get_size() {
-		let map: TileNet<usize> = TileNet::new((10, 10));
+		let map: TileNet<usize> = TileNet::new(10, 10);
 		assert_eq!((10, 10), map.get_size());
-		let map: TileNet<usize> = TileNet::new((194, 483));
-		assert_eq!((194, 483), map.get_size());
+		let map: TileNet<usize> = TileNet::new(483, 194);
+		assert_eq!((483, 194), map.get_size());
 	}
 
 	#[test]
 	fn resize() {
-		let mut map: TileNet<usize> = TileNet::new((10, 10));
+		let mut map: TileNet<usize> = TileNet::new(10, 10);
 		*map.get_mut((0, 0)).unwrap() = 0;
 		map.resize((5, 5));
 		map.resize((10, 10));

@@ -13,7 +13,7 @@ use super::{TileView, TileSet};
 /// use tile_net::TileNet;
 /// #[derive(Clone, Debug, Default)]
 /// struct Example(i32);
-/// let my_net = TileNet::<Example>::new((10, 10));
+/// let my_net = TileNet::<Example>::new(10, 10);
 /// println!("{:?}", my_net);
 /// ```
 #[derive(Clone)]
@@ -178,10 +178,10 @@ impl<T> TileNet<T>
 impl<T> TileNet<T>
     where T: Clone + Default
 {
-	pub fn new(m: (usize, usize)) -> TileNet<T> {
+	pub fn new(x: usize, y: usize) -> TileNet<T> {
 		TileNet {
-			map: vec![T::default(); m.0*m.1],
-			cols: m.1,
+			map: vec![T::default(); x * y],
+			cols: x,
 		}
 	}
 
@@ -242,7 +242,7 @@ impl<T> TileNet<T> {
 	}
 
 	pub fn get_size(&self) -> (usize, usize) {
-		(self.row_count(), self.cols)
+		(self.cols, self.row_count())
 	}
 
 	pub fn view_all(&self) -> TileView<T> {
@@ -289,7 +289,7 @@ mod tests {
 
 	#[test]
 	fn test_proxy() {
-		let mut net: TileNet<usize> = TileNet::new((10, 15));
+		let mut net: TileNet<usize> = TileNet::new(15, 10);
 		let mut net = net.prepare();
 		net.set_box(&1, (2, 2), (4, 6));
 		let span = net.set_box(&2, (3, 3), (14, 6));

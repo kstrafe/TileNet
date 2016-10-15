@@ -86,7 +86,7 @@ fn create_window() -> RenderWindow {
 }
 
 fn create_tilenet() -> tile_net::TileNet<usize> {
-	let mut net: TileNet<usize> = tile_net::TileNet::new((10, 10));
+	let mut net: TileNet<usize> = tile_net::TileNet::new(10, 10);
 	net.set_box(&0, (0, 0), (10, 10));
 	net.set_box(&1, (1, 1), (9, 9));
 	net.set_box(&0, (2, 2), (8, 8));
