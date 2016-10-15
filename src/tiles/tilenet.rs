@@ -147,6 +147,13 @@ impl<T> TileNet<T>
 				self.set(value, (j, i));
 			}
 		}
+		for j in start.0..stop.0 {
+			self.set(value, (j, stop.1));
+		}
+		for i in start.1..stop.1 {
+			self.set(value, (stop.0, i));
+		}
+		self.set(value, (stop.0, stop.1));
 	}
 
 	pub fn set_row(&mut self, value: &T, row: usize) {
@@ -273,5 +280,19 @@ impl<T> TileNet<T> {
 			tilenet: self,
 			points: list,
 		}
+	}
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+
+	#[test]
+	fn test_proxy() {
+		let mut net: TileNet<usize> = TileNet::new((10, 15));
+		let mut net = net.prepare();
+		net.set_box(&1, (2, 2), (4, 6));
+		let span = net.set_box(&2, (3, 3), (14, 6));
+		assert_eq![span, (2, 2, 14, 6)];
 	}
 }
