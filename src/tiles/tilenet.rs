@@ -54,7 +54,7 @@ pub struct TileNetProxy<'a, T: 'a> {
 	max_y: usize,
 }
 
-type Span = (usize, usize, usize, usize);
+pub type Span = (usize, usize, usize, usize);
 impl<'a, T> TileNetProxy<'a, T>
     where T: Clone
 {
