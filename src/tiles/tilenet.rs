@@ -51,6 +51,12 @@ impl TileNet<usize> {
 	}
 }
 
+/// Proxy for editing the `TileNet`
+///
+/// Useful when editing and requiring a span of changed tiles.
+/// The span can be requested at any time. This can be used to
+/// update other states. One particular example is to upload just
+/// that square to the GPU to render on a texture.
 pub struct TileNetProxy<'a, T: 'a> {
 	tilenet: &'a mut TileNet<T>,
 	min_x: usize,
@@ -59,7 +65,8 @@ pub struct TileNetProxy<'a, T: 'a> {
 	max_y: usize,
 }
 
-pub type Span = (usize, usize, usize, usize);
+/// Actual span of changed tiles, given as a square
+pub type Span = (pub usize, pub usize, pub usize, pub usize);
 impl<'a, T> TileNetProxy<'a, T>
     where T: Clone
 {
