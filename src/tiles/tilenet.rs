@@ -279,6 +279,7 @@ impl<T> TileNet<T> {
 		TileSet {
 			tilenet: self,
 			points: list,
+			last_coord: (0, 0),
 		}
 	}
 }

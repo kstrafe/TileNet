@@ -50,6 +50,20 @@ pub struct TileSet<'a, T, I>
 {
 	tilenet: &'a TileNet<T>,
 	points: I,
+	last_coord: (i32, i32),
+}
+
+impl<'a, T, I> TileSet<'a, T, I>
+	where T: 'a,
+	      I: Iterator<Item = (i32, i32)>
+{
+	/// Get the coordinate of the last tile
+	///
+	/// When iterating over the tileset, it may be useful to get the last
+	/// coordinate. This function provides you this coordinate.
+	pub fn get_coords(&self) -> (i32, i32) {
+		self.last_coord
+	}
 }
 
 impl<'a, T, I> Iterator for TileSet<'a, T, I>
@@ -59,6 +73,7 @@ impl<'a, T, I> Iterator for TileSet<'a, T, I>
 	type Item = &'a T;
 	fn next(&mut self) -> Option<Self::Item> {
 		if let Some(point) = self.points.next() {
+			self.last_coord = point;
 			if point.0 >= 0 && point.1 >= 0 {
 				self.tilenet.get((point.0 as usize, point.1 as usize))
 			} else {

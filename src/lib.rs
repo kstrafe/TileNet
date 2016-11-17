@@ -471,4 +471,14 @@ mod tests {
 		}
 	}
 
+	#[test]
+	fn get_coords() {
+		let map = TileNet::sample();
+		let mut set = map.collide_set((3..7).map(|x| (4, x)));
+		for _ in 0..2 {
+			let _ = set.next();
+		}
+		assert_eq!(set.get_coords(), (4, 4));
+	}
+
 }
