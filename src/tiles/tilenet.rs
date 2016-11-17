@@ -66,7 +66,7 @@ pub struct TileNetProxy<'a, T: 'a> {
 }
 
 /// Actual span of changed tiles, given as a square
-pub type Span = (pub usize, pub usize, pub usize, pub usize);
+pub type Span = (usize, usize, usize, usize);
 impl<'a, T> TileNetProxy<'a, T>
     where T: Clone
 {
