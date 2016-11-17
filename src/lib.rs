@@ -447,7 +447,11 @@ mod tests {
 	fn from_iter_with_remainder() {
 		let map: TileNet<usize> = TileNet::from_iter(10, (1..25));
 		let mut view = map.view_box((0, 10, 0, 3));
-		for x in (1..31).map(|x| if x >= 25 { 0 } else { x }) {
+		for x in (1..31).map(|x| if x >= 25 {
+			0
+		} else {
+			x
+		}) {
 			assert_eq!(view.next().unwrap().0, &x);
 		}
 
@@ -461,7 +465,11 @@ mod tests {
 	#[test]
 	fn collide_set() {
 		let map: TileNet<usize> = TileNet::from_iter(10,
-		                                             (1..101).map(|x| if x > 50 { x } else { 0 }));
+		                                             (1..101).map(|x| if x > 50 {
+			                                             x
+			                                            } else {
+			                                             0
+			                                            }));
 		let mut set = map.collide_set((3..7).map(|x| (4, x)));
 		for _ in 1..3 {
 			assert_eq!(set.next().unwrap(), &0);
