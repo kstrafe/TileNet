@@ -1,6 +1,6 @@
 use std::fmt;
 use std::cmp::min;
-pub use self::tilenet::TileNet;
+pub use self::tilenet::{TileNet, TileNetProxy};
 
 mod tilenet;
 

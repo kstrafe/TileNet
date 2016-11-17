@@ -393,7 +393,7 @@ mod tiles;
 
 pub use defs::{SuperCover, Line, Vector};
 pub use collable::{Collable, Points};
-pub use tiles::{TileNet, TileView, TileSet};
+pub use tiles::{TileNet, TileNetProxy, TileView, TileSet};
 
 #[cfg(test)]
 mod tests {
