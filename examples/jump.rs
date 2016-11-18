@@ -37,9 +37,7 @@ fn main() {
 			coller.enqueue(Vector(side_speed, 0.0));
 		}
 
-		let dy = coller.check_x();
 		coller.solve(&net, &mut ColState::check_x());
-		coller.uncheck_x(dy);
 
 		if Key::W.is_pressed() && coller.jmp {
 			coller.set_speed(Vector(0.0, -vert_speed));
@@ -138,18 +136,6 @@ impl Rects {
 		}
 	}
 
-	fn check_x(&mut self) -> f32 {
-		self.checking_x = true;
-		let tmp = self.mov.1;
-		self.mov = Vector(self.mov.0, 0.0);
-		tmp
-	}
-
-	fn uncheck_x(&mut self, dy: f32) {
-		self.checking_x = false;
-		self.mov = Vector(self.mov.0, dy);
-	}
-
 	fn set_speed(&mut self, vec: Vector) {
 		self.mov = vec;
 	}
@@ -164,14 +150,14 @@ impl Rects {
 }
 
 struct ColState {
-	checking_x: bool,
+	checking_x: Option<f32>,
 	downward: bool,
 }
 
 impl Default for ColState {
 	fn default() -> ColState {
 		ColState {
-			checking_x: false,
+			checking_x: None,
 			downward: false,
 		}
 	}
@@ -180,7 +166,7 @@ impl Default for ColState {
 impl ColState {
 	fn check_x() -> ColState {
 		ColState {
-			checking_x: true,
+			checking_x: Some(0.0),
 			downward: false,
 		}
 	}
@@ -188,13 +174,18 @@ impl ColState {
 
 impl Collable<usize, ColState> for Rects {
 	fn presolve(&mut self, state: &mut ColState) {
-		if !state.checking_x {
+		if state.checking_x.is_some() {
+			state.checking_x = Some(self.mov.1);
+			self.mov = Vector(self.mov.0, 0.0);
+		} else {
 			state.downward = self.mov.1 > 1e-6;
 		}
 	}
 
 	fn postsolve(&mut self, collided_once: bool, _resolved: bool, state: &mut ColState) {
-		if !state.checking_x {
+		if let Some(dy) = state.checking_x {
+			self.mov = Vector(self.mov.0, dy);
+		} else {
 			if collided_once && state.downward {
 				self.jmp = true;
 			} else {
@@ -211,7 +202,7 @@ impl Collable<usize, ColState> for Rects {
 		self.mov
 	}
 
-	fn resolve<I>(&mut self, mut set: TileSet<usize, I>, _state: &mut ColState) -> bool
+	fn resolve<I>(&mut self, mut set: TileSet<usize, I>, state: &mut ColState) -> bool
 		where I: Iterator<Item = (i32, i32)>
 	{
 		let mut mov = self.mov;
@@ -221,7 +212,7 @@ impl Collable<usize, ColState> for Rects {
 			self.mov = Vector(0.0, mov.1);
 			true
 		} else if mov.norm2sq() > 1e-6 {
-			if self.checking_x {
+			if state.checking_x.is_some() {
 				mov = Vector(mov.0 * 0.59, mov.1);
 				self.mov = mov;
 			} else {

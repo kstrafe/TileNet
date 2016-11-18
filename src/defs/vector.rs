@@ -11,10 +11,12 @@ use std::ops::{Add, Sub};
 /// assert_eq!(point.0, 0.5);
 /// assert_eq!(point.1, 1.0);
 /// ```
+///
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Vector(pub f32, pub f32);
 
 impl Vector {
+	/// Create a vector from a float tuple
 	pub fn from_tuple(tuple: (f32, f32)) -> Vector {
 		Vector(tuple.0, tuple.1)
 	}

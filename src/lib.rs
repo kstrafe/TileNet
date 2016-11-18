@@ -1,6 +1,7 @@
 #![cfg_attr(feature = "dev", allow(unstable_features))]
 #![cfg_attr(feature = "dev", feature(plugin))]
 #![cfg_attr(feature = "dev", plugin(clippy))]
+#![deny(missing_docs)]
 //! `TileNet` holds integer aligned tiles for broad phase continuous collision detection.
 //! The purpose of `TileNet` is to have a solid, tile-based, continuous, simple collision
 //! library for aspiring game programmers.
@@ -16,6 +17,7 @@
 //! a small increment to a floating point above 2^24 may not register at all. Precision
 //! becomes worse as you approach 2^24. The technical reason is that a 32-bit float
 //! has 24 bits in its mantissa.
+//! You do not need to worry about floating point errors, as the library ensures consistency by checking end-points.
 //!
 //! # Examples - Setting Up #
 //! We start out by including tile net into our program and creating an empty net
@@ -30,7 +32,7 @@
 //!
 //! ```
 //! This creates a `TileNet` that contains `usize` as its elements.
-//! All tiles are initialized to None.
+//! All tiles are initialized to `Default` of `usize`.
 //! You can now edit various tiles:
 //!
 //! ```
@@ -123,8 +125,11 @@
 //! impl MyObject {
 //!   fn new() -> MyObject {
 //!     MyObject {
+//!       // These are the points in object-space
 //!       pts: vec![(0.0, 0.0), (1.0, 0.0), (0.0, 1.0), (1.0, 1.0)],
+//!       // The current position of the object
 //!       pos: Vector(1.1, 1.1),
+//!       // The movement vector
 //!       mov: Vector(100.0, 100.0),
 //!     }
 //!   }
@@ -161,7 +166,7 @@
 //!       self.mov.scale(0.9);
 //!       false
 //!     } else {  // This may happen if we generate a world where we're stuck in a tile,
-//!               // normally this will never happen, this library can preserve consistently
+//!               // normally this will never happen, this library can preserve consistency
 //!               // perfectly.
 //!       true
 //!     }

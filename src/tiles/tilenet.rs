@@ -41,6 +41,7 @@ impl<T: fmt::Debug> fmt::Debug for TileNet<T> {
 }
 
 impl TileNet<usize> {
+	/// Create a simple sample grid
 	pub fn sample() -> TileNet<usize> {
 		TileNet::from_iter(10, (1..101).map(|x| if x > 50 { x } else { 0 }))
 	}
@@ -65,10 +66,14 @@ pub type Span = (usize, usize, usize, usize);
 impl<'a, T> TileNetProxy<'a, T>
     where T: Clone
 {
+	/// Get the span of the changes made
 	pub fn get_span(&self) -> Span {
 		(self.min_x, self.min_y, self.max_x, self.max_y)
 	}
 
+	/// Set a box
+	///
+	/// Start should be less than stop
 	pub fn set_box(&mut self, value: &T, start: (usize, usize), stop: (usize, usize)) -> Span {
 		self.tilenet.set_box(value, start, stop);
 		if start.0 < self.min_x {
@@ -86,6 +91,7 @@ impl<'a, T> TileNetProxy<'a, T>
 		self.get_span()
 	}
 
+	/// Set an entire row
 	pub fn set_row(&mut self, value: &T, row: usize) -> Span {
 		self.tilenet.set_row(value, row);
 		self.min_x = 0;
@@ -99,6 +105,7 @@ impl<'a, T> TileNetProxy<'a, T>
 		self.get_span()
 	}
 
+	/// Set an entire column
 	pub fn set_col(&mut self, value: &T, col: usize) -> Span {
 		self.tilenet.set_col(value, col);
 		self.min_y = 0;
@@ -112,6 +119,7 @@ impl<'a, T> TileNetProxy<'a, T>
 		self.get_span()
 	}
 
+	/// Set a single grid point
 	pub fn set(&mut self, value: &T, p: (usize, usize)) -> Span {
 		self.tilenet.set(value, p);
 		if p.0 < self.min_x {
@@ -133,6 +141,7 @@ impl<'a, T> TileNetProxy<'a, T>
 impl<T> TileNet<T>
     where T: Clone
 {
+	/// Create a proxy to be able to get the span of a change
 	pub fn prepare(&mut self) -> TileNetProxy<T> {
 		let size = self.get_size();
 		TileNetProxy {
@@ -144,10 +153,12 @@ impl<T> TileNet<T>
 		}
 	}
 
+	/// Get the raw array behind the tilenet
 	pub fn get_raw(&self) -> &[T] {
 		self.map.as_slice()
 	}
 
+	/// Set a box in the tilenet
 	pub fn set_box(&mut self, value: &T, start: (usize, usize), stop: (usize, usize)) {
 		for i in start.1..stop.1 {
 			for j in start.0..stop.0 {
@@ -163,18 +174,21 @@ impl<T> TileNet<T>
 		self.set(value, (stop.0, stop.1));
 	}
 
+	/// Set a row
 	pub fn set_row(&mut self, value: &T, row: usize) {
 		for i in 0..self.col_count() {
 			self.set(value, (i, row));
 		}
 	}
 
+	/// Set a column
 	pub fn set_col(&mut self, value: &T, col: usize) {
 		for i in 0..self.row_count() {
 			self.set(value, (col, i));
 		}
 	}
 
+	/// Set a single grid point
 	pub fn set(&mut self, value: &T, p: (usize, usize)) {
 		if let Some(old) = self.get_mut(p) {
 			*old = value.clone();
@@ -185,6 +199,9 @@ impl<T> TileNet<T>
 impl<T> TileNet<T>
     where T: Clone + Default
 {
+	/// Create a new tilenet of the size (cols, rows)
+	///
+	/// The tiles will be Default-created
 	pub fn new(x: usize, y: usize) -> TileNet<T> {
 		TileNet {
 			map: vec![T::default(); x * y],
@@ -192,6 +209,9 @@ impl<T> TileNet<T>
 		}
 	}
 
+	/// Resize the grid
+	///
+	/// If the grid grows, new tiles will be Default-created
 	pub fn resize(&mut self, m: (usize, usize)) {
 		let mut new_map: Vec<T> = vec![T::default(); m.0*m.1];
 		let new_cols = m.1;
@@ -202,7 +222,7 @@ impl<T> TileNet<T>
 			.enumerate()
 			.map(|x| (x.0 % self.cols, x.0 / self.cols, x.1))
 			.filter(|x| x.0 < new_cols && x.1 < new_rows)
-			.inspect(|x| *new_map.get_mut(x.0 + x.1 * new_cols).unwrap() = x.2.clone())
+			.inspect(|x| new_map[x.0 + x.1 * new_cols] = x.2.clone())
 			.count();
 
 		self.map = new_map;
@@ -213,6 +233,11 @@ impl<T> TileNet<T>
 impl<T> TileNet<T>
     where T: Default
 {
+	/// Create a tilenet from an iterator
+	///
+	/// Takes a column count and an iterator.
+	/// If the iterator does not describe the entire box
+	/// the remaining elements are filled in by Default.
 	pub fn from_iter<I>(columns: usize, iter: I) -> TileNet<T>
 		where I: Iterator<Item = T>
 	{
@@ -232,14 +257,17 @@ impl<T> TileNet<T>
 }
 
 impl<T> TileNet<T> {
+	/// Compute the row count
 	pub fn row_count(&self) -> usize {
 		self.map.len() / self.cols
 	}
 
+	/// Get the column count
 	pub fn col_count(&self) -> usize {
 		self.cols
 	}
 
+	/// Get a reference to a 2D index
 	pub fn get(&self, p: (usize, usize)) -> Option<&T> {
 		if p.0 >= self.cols {
 			None
@@ -248,19 +276,23 @@ impl<T> TileNet<T> {
 		}
 	}
 
+	/// Get a tuple that describes the size as (cols, rows)
 	pub fn get_size(&self) -> (usize, usize) {
 		(self.cols, self.row_count())
 	}
 
+	/// Create a proxy view that iterates over all tiles
 	pub fn view_all(&self) -> TileView<T> {
 		TileView::new(self, (0, self.cols, 0, self.map.len() / self.cols))
 	}
 
+	/// Create a proxy view with a span from the center using a float position
 	pub fn view_center_f32(&self, position: (f32, f32), span: (usize, usize)) -> TileView<T> {
 		let position = (position.0.max(0.0) as usize, position.1.max(0.0) as usize);
 		self.view_center(position, span)
 	}
 
+	/// Create a proxy view with a span from the center using an integer position
 	pub fn view_center(&self, position: (usize, usize), span: (usize, usize)) -> TileView<T> {
 		let left = position.0.checked_sub(span.0).unwrap_or(0);
 		let top = position.1.checked_sub(span.1).unwrap_or(0);
@@ -269,9 +301,12 @@ impl<T> TileNet<T> {
 		TileView::new(self, (left, right, top, bottom))
 	}
 
+	/// Create a view box that iterates over tiles within that box
 	pub fn view_box(&self, rectangle: (usize, usize, usize, usize)) -> TileView<T> {
 		TileView::new(self, rectangle)
 	}
+
+	/// Get a mutable reference to a tile
 	pub fn get_mut(&mut self, p: (usize, usize)) -> Option<&mut T> {
 		if p.0 >= self.cols {
 			None
@@ -280,6 +315,7 @@ impl<T> TileNet<T> {
 		}
 	}
 
+	/// Create an iterator of tiles from an iterator over indices
 	pub fn collide_set<I>(&self, list: I) -> TileSet<T, I>
 		where I: Iterator<Item = (i32, i32)>
 	{

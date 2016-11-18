@@ -13,6 +13,20 @@ pub struct Points<'a> {
 }
 
 impl<'a> Points<'a> {
+	/// Create a new points iterator
+	///
+	/// The points iterator creates an iterator over all points by adding the vector offset vector.
+	///
+	/// ```
+	/// use tile_net::*;
+	/// fn main() {
+	///   let initial = vec![(0.0, 0.0), (1.0, 0.0)];
+	///   let mut points = Points::new(Vector(3.0, 4.0), &initial);
+	///   assert_eq![points.next().unwrap(), (3.0, 4.0)];
+	///   assert_eq![points.next().unwrap(), (4.0, 4.0)];
+	/// }
+	/// ```
+	///
 	pub fn new(offset: Vector, points: &'a [(f32, f32)]) -> Points {
 		Points {
 			index: 0,
