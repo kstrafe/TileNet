@@ -38,7 +38,7 @@ fn main() {
 		}
 
 		let dy = coller.check_x();
-		coller.solve(&net);
+		coller.solve(&net, &mut ColState::check_x());
 		coller.uncheck_x(dy);
 
 		if Key::W.is_pressed() && coller.jmp {
@@ -50,12 +50,12 @@ fn main() {
 		}
 
 		coller.enqueue(Vector(0.0, gravity));
-		coller.solve(&net);
+		coller.solve(&net, &mut ColState::default());
 
 		window.clear(&Color::new_rgb(255, 255, 255));
 		let mut view = View::new_init(&Vector2f::new(0.0, 0.0),
 		                              &Vector2f::new(WINDOW.0 as f32, WINDOW.1 as f32))
-			.unwrap();
+		                              .unwrap();
 		let pos = coller.get_pos();
 		view.set_center(&Vector2f::new(pos.0 * SIZE, pos.1 * SIZE));
 		window.set_view(&view);
@@ -163,16 +163,39 @@ impl Rects {
 	}
 }
 
-impl Collable<usize> for Rects {
-	fn presolve(&mut self) {
-		if !self.checking_x {
-			self.downward = self.mov.1 > 1e-6;
+struct ColState {
+	checking_x: bool,
+	downward: bool,
+}
+
+impl Default for ColState {
+	fn default() -> ColState {
+		ColState {
+			checking_x: false,
+			downward: false,
+		}
+	}
+}
+
+impl ColState {
+	fn check_x() -> ColState {
+		ColState {
+			checking_x: true,
+			downward: false,
+		}
+	}
+}
+
+impl Collable<usize, ColState> for Rects {
+	fn presolve(&mut self, state: &mut ColState) {
+		if !state.checking_x {
+			state.downward = self.mov.1 > 1e-6;
 		}
 	}
 
-	fn postsolve(&mut self, collided_once: bool, _resolved: bool) {
-		if !self.checking_x {
-			if collided_once && self.downward {
+	fn postsolve(&mut self, collided_once: bool, _resolved: bool, state: &mut ColState) {
+		if !state.checking_x {
+			if collided_once && state.downward {
 				self.jmp = true;
 			} else {
 				self.jmp = false;
@@ -188,7 +211,7 @@ impl Collable<usize> for Rects {
 		self.mov
 	}
 
-	fn resolve<I>(&mut self, mut set: TileSet<usize, I>) -> bool
+	fn resolve<I>(&mut self, mut set: TileSet<usize, I>, _state: &mut ColState) -> bool
 		where I: Iterator<Item = (i32, i32)>
 	{
 		let mut mov = self.mov;

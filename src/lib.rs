@@ -106,7 +106,7 @@
 //!   let supercover = collider.tiles();  // This is the supercover of the current movement
 //!   // in the grid, it just returns integer points of every tile that collider touches
 //!   let tiles = net.collide_set(supercover);
-//!   if collider.resolve(tiles) {
+//!   if collider.resolve(tiles, &mut ()) {
 //!     println!["Able to move"];
 //!   } else {
 //!     println!["Unable to move"];
@@ -131,7 +131,7 @@
 //!
 //! }
 //!
-//! impl Collable<usize> for MyObject {
+//! impl Collable<usize, ()> for MyObject {
 //!   // This function returns the vertices of the object
 //!   // The points are used by the collision engine to create a set of
 //!   // lines from the beginning to the end of the frame.
@@ -150,7 +150,7 @@
 //!   // collides between the current frame jump.
 //!   // The tiles given are in nearest-order, so the first tiles you get from the
 //!   // iterator are always the ones you will collide with first.
-//!   fn resolve<'a, I>(&mut self, mut set: TileSet<'a, usize, I>) -> bool
+//!   fn resolve<'a, I>(&mut self, mut set: TileSet<'a, usize, I>, _state: &mut ()) -> bool
 //!     where I: Iterator<Item = (i32, i32)>
 //!   {
 //!     if set.all(|x| *x == 0) {  // If there is no collision (we only collide with non-zero tiles)
@@ -193,7 +193,7 @@
 //!   loop {
 //!     let supercover = collider.tiles();
 //!     let tiles = net.collide_set(supercover);
-//!     if collider.resolve(tiles) {
+//!     if collider.resolve(tiles, &mut ()) {
 //!       println!["Able to move"];
 //!       break;
 //!     } else {
@@ -222,7 +222,7 @@
 //!
 //! }
 //!
-//! impl Collable<usize> for MyObject {
+//! impl Collable<usize, ()> for MyObject {
 //!   // This function returns the vertices of the object
 //!   // The points are used by the collision engine to create a set of
 //!   // lines from the beginning to the end of the frame.
@@ -241,7 +241,7 @@
 //!   // collides between the current frame jump.
 //!   // The tiles given are in nearest-order, so the first tiles you get from the
 //!   // iterator are always the ones you will collide with first.
-//!   fn resolve<'a, I>(&mut self, mut set: TileSet<'a, usize, I>) -> bool
+//!   fn resolve<'a, I>(&mut self, mut set: TileSet<'a, usize, I>, _state: &mut ()) -> bool
 //!     where I: Iterator<Item = (i32, i32)>
 //!   {
 //!     if set.all(|x| *x == 0) {  // If there is no collision (we only collide with non-zero tiles)
@@ -325,7 +325,7 @@
 //!   println!["{:?}", net];
 //!
 //!   let mut collider = MyObject::new();
-//!   collider.solve(&net);  // Much simpler than the loop!
+//!   collider.solve(&net, &mut ());  // Much simpler than the loop!
 //!   println!["{:?}", collider];
 //! }
 //!
@@ -347,7 +347,7 @@
 //!
 //! }
 //!
-//! impl Collable<usize> for MyObject {
+//! impl Collable<usize, ()> for MyObject {
 //!   fn points<'a>(&'a self) -> Points<'a> {
 //!     Points::new(self.pos, &self.pts)
 //!   }
@@ -356,7 +356,7 @@
 //!     self.mov
 //!   }
 //!
-//!   fn postsolve(&mut self, _collided_once: bool, resolved: bool) {
+//!   fn postsolve(&mut self, _collided_once: bool, resolved: bool, _state: &mut ()) {
 //!     if resolved {
 //!       println!["Able to move"];
 //!     } else {
@@ -364,7 +364,7 @@
 //!     }
 //!   }
 //!
-//!   fn resolve<'a, I>(&mut self, mut set: TileSet<'a, usize, I>) -> bool
+//!   fn resolve<'a, I>(&mut self, mut set: TileSet<'a, usize, I>, _state: &mut ()) -> bool
 //!     where I: Iterator<Item = (i32, i32)>
 //!   {
 //!     if set.all(|x| *x == 0) {  // If there is no collision (we only collide with non-zero tiles)
@@ -380,6 +380,15 @@
 //!   }
 //! }
 //! ```
+//! # State #
+//! You may have seen the `state` variables in `presolve`, `solve`, and `postsolve`.
+//! You can put arbitrary information in this variable. It allows you to communicate between
+//! the three stages and outside of the `solve` call.
+//!
+//! State is appropriate whenever there exists a property that is not supposed to be part of
+//! the `Collable` that you are implementing. In addition to making your `Collable` cleaner,
+//! you also avoid redundant information stored in your objects.
+//!
 //! See the examples directory for an example where we use presolve and postsolve
 //! to find out if our object can jump or not.
 
@@ -447,11 +456,7 @@ mod tests {
 	fn from_iter_with_remainder() {
 		let map: TileNet<usize> = TileNet::from_iter(10, (1..25));
 		let mut view = map.view_box((0, 10, 0, 3));
-		for x in (1..31).map(|x| if x >= 25 {
-			0
-		} else {
-			x
-		}) {
+		for x in (1..31).map(|x| if x >= 25 { 0 } else { x }) {
 			assert_eq!(view.next().unwrap().0, &x);
 		}
 
@@ -465,11 +470,7 @@ mod tests {
 	#[test]
 	fn collide_set() {
 		let map: TileNet<usize> = TileNet::from_iter(10,
-		                                             (1..101).map(|x| if x > 50 {
-			                                             x
-			                                            } else {
-			                                             0
-			                                            }));
+		                                             (1..101).map(|x| if x > 50 { x } else { 0 }));
 		let mut set = map.collide_set((3..7).map(|x| (4, x)));
 		for _ in 1..3 {
 			assert_eq!(set.next().unwrap(), &0);

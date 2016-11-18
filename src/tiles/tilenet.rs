@@ -42,12 +42,7 @@ impl<T: fmt::Debug> fmt::Debug for TileNet<T> {
 
 impl TileNet<usize> {
 	pub fn sample() -> TileNet<usize> {
-		TileNet::from_iter(10,
-		                   (1..101).map(|x| if x > 50 {
-			                   x
-			                  } else {
-			                   0
-			                  }))
+		TileNet::from_iter(10, (1..101).map(|x| if x > 50 { x } else { 0 }))
 	}
 }
 
