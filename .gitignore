@@ -1,0 +1,8 @@
+*
+!.gitignore
+!Cargo.toml
+!rustfmt.toml
+!readme.md
+!makefile
+!examples/
+!src/
