@@ -17,7 +17,8 @@
 //! a small increment to a floating point above 2^24 may not register at all. Precision
 //! becomes worse as you approach 2^24. The technical reason is that a 32-bit float
 //! has 24 bits in its mantissa.
-//! You do not need to worry about floating point errors, as the library ensures consistency by checking end-points.
+//! You do not need to worry about floating point errors, as the library ensures consistency
+//! by checking end-points.
 //!
 //! # Examples - Setting Up #
 //! We start out by including tile net into our program and creating an empty net

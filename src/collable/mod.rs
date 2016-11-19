@@ -108,13 +108,16 @@ pub trait Collable<T, S> {
 	/// The sortedness of the returned iterator means you can base your decision on the
 	/// first element(s), as they represent the first collision.
 	fn tiles(&self) -> MultiIter<(i32, i32)> {
-		let points = self.points();
-		let queued = self.queued();
+		let origin = self.points();
+		let mut destination = self.points();
+		destination.offset = destination.offset + self.queued();
 		let mut multi = interleave!((i32, i32););
-		for point in points {
-			let current = Vector::from_tuple(point);
-			let next = current + queued;
-			let line = Line(current, next);
+
+		for point1 in origin {
+			let point2 = destination.next().unwrap();
+			let point1 = Vector::from_tuple(point1);
+			let point2 = Vector::from_tuple(point2);
+			let line = Line(point1, point2);
 			multi.push(Box::new(line.supercover()));
 		}
 		multi
