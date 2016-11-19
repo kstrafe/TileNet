@@ -1,4 +1,4 @@
-use std::ops::{Add, Sub};
+use std::ops::{Add, AddAssign, Sub};
 
 /// Describe a point in 2-space
 ///
@@ -38,6 +38,13 @@ impl Add for Vector {
 
 	fn add(self, other: Vector) -> Vector {
 		Vector(self.0 + other.0, self.1 + other.1)
+	}
+}
+
+impl AddAssign for Vector {
+	fn add_assign(&mut self, rhs: Vector) {
+		self.0 += rhs.0;
+		self.1 += rhs.1;
 	}
 }
 

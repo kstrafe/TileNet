@@ -110,7 +110,7 @@ pub trait Collable<T, S> {
 	fn tiles(&self) -> MultiIter<(i32, i32)> {
 		let origin = self.points();
 		let mut destination = self.points();
-		destination.offset = destination.offset + self.queued();
+		destination.offset += self.queued();
 		let mut multi = interleave!((i32, i32););
 
 		for point1 in origin {
