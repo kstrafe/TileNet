@@ -1,4 +1,5 @@
-*
+/*
+*.bk
 !.gitignore
 !Cargo.toml
 !rustfmt.toml
