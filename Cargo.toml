@@ -1,6 +1,6 @@
 [package]
 name = "tile_net"
-version = "2.0.3"
+version = "2.0.4"
 authors = ["Kevin Robert Stravers <macocio@gmail.com>"]
 license = "GPL-3.0"
 keywords = ["tile", "collision"]

@@ -72,15 +72,18 @@ impl<'a, T, I> Iterator for TileSet<'a, T, I>
 {
 	type Item = &'a T;
 	fn next(&mut self) -> Option<Self::Item> {
-		if let Some(point) = self.points.next() {
-			self.last_coord = point;
-			if point.0 >= 0 && point.1 >= 0 {
-				self.tilenet.get((point.0 as usize, point.1 as usize))
+		loop {
+			if let Some(point) = self.points.next() {
+				self.last_coord = point;
+				if point.0 >= 0 && point.1 >= 0 && point.0 < self.tilenet.get_size().0 as i32 &&
+				   point.1 < self.tilenet.get_size().1 as i32 {
+					return self.tilenet.get((point.0 as usize, point.1 as usize));
+				} else {
+					continue;
+				}
 			} else {
-				None
+				return None;
 			}
-		} else {
-			None
 		}
 	}
 }
