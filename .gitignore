@@ -1,6 +1,7 @@
 /*
 *.bk
 !.gitignore
+!ideas.md
 !Cargo.toml
 !rustfmt.toml
 !readme.md
