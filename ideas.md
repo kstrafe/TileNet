@@ -13,3 +13,10 @@
 6. If true we have collision
 7. Obstacles: do not move if there is collision. Else move
 8. Items: interact
+
+# Continuous 3D Collision Detection #
+0. Prune collisions by using sweep-and-prune
+1. Use 4D boolean GJK (bgjk4d) to determine intersections using continuous motion
+
+# Collision Resolution #
+This has to be worked out
