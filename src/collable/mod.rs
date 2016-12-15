@@ -49,16 +49,16 @@ impl<'a> Iterator for Points<'a> {
 	}
 }
 
+pub trait CollableState {
+	fn queued(&self) -> Vector;
+}
+
 /// Trait for dynamic objects so they can easily check collisions with the `TileMap`
-pub trait Collable<T, S> {
+pub trait Collable<T, S: CollableState> {
 	/// Returns the set of points associated with this object. These points are used to
 	/// draw lines to their respective next points. For a rectangle, the four courners
 	/// may be points. For a circle, a whole bunch of points may be defined.
 	fn points(&self) -> Points;
-
-	/// Get the previously queued move. Should reasonably return what was given in `enqueue`,
-	/// but you can do whatever makes sense in your application.
-	fn queued(&self) -> Vector;
 
 	/// Resolve the movement: you get a set of tiles and you decide what to do with them.
 	/// If you aren't satisfied, you can change the move vector and return false, this means
@@ -93,7 +93,7 @@ pub trait Collable<T, S> {
 		let mut collided_once = false;
 		let mut resolved = false;
 		for _ in 0..MAX_ITERATIONS {
-			let tiles = net.collide_set(self.tiles());
+			let tiles = net.collide_set(self.tiles(state.queued()));
 			if self.resolve(tiles, state) {
 				resolved = true;
 				break;
@@ -107,10 +107,10 @@ pub trait Collable<T, S> {
 	///
 	/// The sortedness of the returned iterator means you can base your decision on the
 	/// first element(s), as they represent the first collision.
-	fn tiles(&self) -> MultiIter<(i32, i32)> {
+	fn tiles(&self, queued: Vector) -> MultiIter<(i32, i32)> {
 		let origin = self.points();
 		let mut destination = self.points();
-		destination.offset += self.queued();
+		destination.offset += queued;
 		let mut multi = interleave!((i32, i32););
 
 		for point1 in origin {
