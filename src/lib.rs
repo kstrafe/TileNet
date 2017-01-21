@@ -106,14 +106,27 @@
 //!
 //!   // We create a new object with speed (100, 100) and check where our collision points will be!
 //!   let mut collider = MyObject::new();
-//!   let supercover = collider.tiles();  // This is the supercover of the current movement
+//!   let mut state = MyObjectCollisionState { mov: Vector(100.0, 100.0) };
+//!   let supercover = collider.tiles(state.mov);  // This is the supercover of the current movement
 //!   // in the grid, it just returns integer points of every tile that collider touches
 //!   let tiles = net.collide_set(supercover);
-//!   if collider.resolve(tiles, &mut ()) {
+//!   if collider.resolve(tiles, &mut state) {
 //!     println!["Able to move"];
 //!   } else {
 //!     println!["Unable to move"];
 //!   }
+//! }
+//!
+//! impl CollableState for MyObjectCollisionState {
+//!   // The physics engine uses this function in conjunction with points to compute
+//!   // the lines - and thus - tiles it will iterate over during a collision test.
+//!   fn queued(&self) -> Vector {
+//!     self.mov
+//!   }
+//! }
+//!
+//! struct MyObjectCollisionState {
+//!   pub mov: Vector,
 //! }
 //!
 //! #[derive(Debug)]
@@ -137,7 +150,7 @@
 //!
 //! }
 //!
-//! impl Collable<usize, ()> for MyObject {
+//! impl Collable<usize, MyObjectCollisionState> for MyObject {
 //!   // This function returns the vertices of the object
 //!   // The points are used by the collision engine to create a set of
 //!   // lines from the beginning to the end of the frame.
@@ -145,26 +158,22 @@
 //!     Points::new(self.pos, &self.pts)
 //!   }
 //!
-//!   // The physics engine uses this function in conjunction with points to compute
-//!   // the lines - and thus - tiles it will iterate over during a collision test.
-//!   fn queued(&self) -> Vector {
-//!     self.mov
-//!   }
-//!
 //!   // Here is where your magic happens!
 //!   // You will be given a TileSet, which contains all tiles which your object
 //!   // collides between the current frame jump.
 //!   // The tiles given are in nearest-order, so the first tiles you get from the
 //!   // iterator are always the ones you will collide with first.
-//!   fn resolve<'a, I>(&mut self, mut set: TileSet<'a, usize, I>, _state: &mut ()) -> bool
+//!   fn resolve<'a, I>(&mut self, mut set: TileSet<'a, usize, I>, state: &mut MyObjectCollisionState) -> bool
 //!     where I: Iterator<Item = (i32, i32)>
 //!   {
 //!     if set.all(|x| *x == 0) {  // If there is no collision (we only collide with non-zero tiles)
 //!       self.pos = self.pos + self.mov;
 //!       self.mov = Vector(0.0, 0.0);
+//!       state.mov = Vector(0.0, 0.0);
 //!       true
 //!     } else if self.mov.norm2sq() > 1e-6 {  // There was collision, but our speed isn't tiny
 //!       self.mov.scale(0.9);
+//!       state.mov.scale(0.9);
 //!       false
 //!     } else {  // This may happen if we generate a world where we're stuck in a tile,
 //!               // normally this will never happen, this library can preserve consistency
@@ -196,10 +205,11 @@
 //!
 //!   // Movement vector is (100, 100), which is way outside the box
 //!   let mut collider = MyObject::new();
+//!   let mut state = MyObjectCollisionState { mov: Vector(100.0, 100.0) };
 //!   loop {
-//!     let supercover = collider.tiles();
+//!     let supercover = collider.tiles(state.mov);
 //!     let tiles = net.collide_set(supercover);
-//!     if collider.resolve(tiles, &mut ()) {
+//!     if collider.resolve(tiles, &mut state) {
 //!       println!["Able to move"];
 //!       break;
 //!     } else {
@@ -217,6 +227,18 @@
 //!   mov: Vector,
 //! }
 //!
+//! impl CollableState for MyObjectCollisionState {
+//!   // The physics engine uses this function in conjunction with points to compute
+//!   // the lines - and thus - tiles it will iterate over during a collision test.
+//!   fn queued(&self) -> Vector {
+//!     self.mov
+//!   }
+//! }
+//!
+//! struct MyObjectCollisionState {
+//!   pub mov: Vector,
+//! }
+//!
 //! impl MyObject {
 //!   fn new() -> MyObject {
 //!     MyObject {
@@ -228,7 +250,7 @@
 //!
 //! }
 //!
-//! impl Collable<usize, ()> for MyObject {
+//! impl Collable<usize, MyObjectCollisionState> for MyObject {
 //!   // This function returns the vertices of the object
 //!   // The points are used by the collision engine to create a set of
 //!   // lines from the beginning to the end of the frame.
@@ -236,26 +258,22 @@
 //!     Points::new(self.pos, &self.pts)
 //!   }
 //!
-//!   // The physics engine uses this function in conjunction with points to compute
-//!   // the lines - and thus - tiles it will iterate over during a collision test.
-//!   fn queued(&self) -> Vector {
-//!     self.mov
-//!   }
-//!
 //!   // Here is where your magic happens!
 //!   // You will be given a TileSet, which contains all tiles which your object
 //!   // collides between the current frame jump.
 //!   // The tiles given are in nearest-order, so the first tiles you get from the
 //!   // iterator are always the ones you will collide with first.
-//!   fn resolve<'a, I>(&mut self, mut set: TileSet<'a, usize, I>, _state: &mut ()) -> bool
+//!   fn resolve<'a, I>(&mut self, mut set: TileSet<'a, usize, I>, state: &mut MyObjectCollisionState) -> bool
 //!     where I: Iterator<Item = (i32, i32)>
 //!   {
 //!     if set.all(|x| *x == 0) {  // If there is no collision (we only collide with non-zero tiles)
 //!       self.pos = self.pos + self.mov;
 //!       self.mov = Vector(0.0, 0.0);
+//!       state.mov = Vector(0.0, 0.0);
 //!       true  // Means we resolved correctly
 //!     } else if self.mov.norm2sq() > 1e-6 {  // There was collision, but our speed isn't tiny
 //!       self.mov.scale(0.9);
+//!       state.mov.scale(0.9);
 //!       false  // Means we did not resolve collision
 //!     } else {
 //!       true
@@ -331,8 +349,21 @@
 //!   println!["{:?}", net];
 //!
 //!   let mut collider = MyObject::new();
-//!   collider.solve(&net, &mut ());  // Much simpler than the loop!
+//!   let mut state = MyObjectCollisionState { mov: Vector(100.0, 100.0) };
+//!   collider.solve(&net, &mut state);  // Much simpler than the loop!
 //!   println!["{:?}", collider];
+//! }
+//!
+//! impl CollableState for MyObjectCollisionState {
+//!   // The physics engine uses this function in conjunction with points to compute
+//!   // the lines - and thus - tiles it will iterate over during a collision test.
+//!   fn queued(&self) -> Vector {
+//!     self.mov
+//!   }
+//! }
+//!
+//! struct MyObjectCollisionState {
+//!   pub mov: Vector,
 //! }
 //!
 //! #[derive(Debug)]
@@ -353,16 +384,12 @@
 //!
 //! }
 //!
-//! impl Collable<usize, ()> for MyObject {
+//! impl Collable<usize, MyObjectCollisionState> for MyObject {
 //!   fn points<'a>(&'a self) -> Points<'a> {
 //!     Points::new(self.pos, &self.pts)
 //!   }
 //!
-//!   fn queued(&self) -> Vector {
-//!     self.mov
-//!   }
-//!
-//!   fn postsolve(&mut self, _collided_once: bool, resolved: bool, _state: &mut ()) {
+//!   fn postsolve(&mut self, _collided_once: bool, resolved: bool, _state: &mut MyObjectCollisionState) {
 //!     if resolved {
 //!       println!["Able to move"];
 //!     } else {
@@ -370,15 +397,17 @@
 //!     }
 //!   }
 //!
-//!   fn resolve<'a, I>(&mut self, mut set: TileSet<'a, usize, I>, _state: &mut ()) -> bool
+//!   fn resolve<'a, I>(&mut self, mut set: TileSet<'a, usize, I>, state: &mut MyObjectCollisionState) -> bool
 //!     where I: Iterator<Item = (i32, i32)>
 //!   {
 //!     if set.all(|x| *x == 0) {  // If there is no collision (we only collide with non-zero tiles)
 //!       self.pos = self.pos + self.mov;
 //!       self.mov = Vector(0.0, 0.0);
+//!       state.mov = Vector(0.0, 0.0);
 //!       true  // Means we resolved correctly
 //!     } else if self.mov.norm2sq() > 1e-6 {  // There was collision, but our speed isn't tiny
 //!       self.mov.scale(0.9);
+//!       state.mov.scale(0.9);
 //!       false  // Means we did not resolve collision
 //!     } else {
 //!       true

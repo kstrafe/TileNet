@@ -49,7 +49,9 @@ impl<'a> Iterator for Points<'a> {
 	}
 }
 
+/// Capture the queued motion of the object
 pub trait CollableState {
+	/// Returns the movement vector of the object
 	fn queued(&self) -> Vector;
 }
 

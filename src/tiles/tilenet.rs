@@ -138,6 +138,19 @@ impl<'a, T> TileNetProxy<'a, T>
 	}
 }
 
+/// Ensure that
+fn positivize_isize(value: isize) -> usize {
+	if value < 0 {
+		0
+	} else {
+		value as usize
+	}
+}
+
+fn positivize_2_tuple(value: (isize, isize)) -> (usize, usize) {
+	(positivize_isize(value.0), positivize_isize(value.1))
+}
+
 impl<T> TileNet<T>
     where T: Clone
 {
@@ -156,6 +169,14 @@ impl<T> TileNet<T>
 	/// Get the raw array behind the tilenet
 	pub fn get_raw(&self) -> &[T] {
 		self.map.as_slice()
+	}
+
+
+	/// Use isizes to denote indices to prevent underflow
+	pub fn set_box_isize(&mut self, value: &T, start: (isize, isize), stop: (isize, isize)) {
+		let new_start = positivize_2_tuple(start);
+		let new_stop = positivize_2_tuple(stop);
+		self.set_box(value, new_start, new_stop);
 	}
 
 	/// Set a box in the tilenet
