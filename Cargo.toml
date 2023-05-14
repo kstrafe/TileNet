@@ -1,11 +1,11 @@
 [package]
 name = "tile_net"
-version = "2.0.4"
-authors = ["Kevin Robert Stravers <macocio@gmail.com>"]
+version = "2.0.5"
+authors = ["Kevin Robert Stravers <kevin@stravers.net>"]
 license = "GPL-3.0"
 keywords = ["tile", "collision"]
-documentation = "https://tile.stravers.net/tile_net"
-repository = "https://github.com/BourgondAries/TileNet"
+documentation = "https://docs.rs/tile_net"
+repository = "https://github.com/kstrafe/TileNet"
 description = """
 Continuous tile-based collision detection and resolution.
 """
